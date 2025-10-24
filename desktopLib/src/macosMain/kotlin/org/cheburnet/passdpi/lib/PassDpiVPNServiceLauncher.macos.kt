@@ -6,10 +6,13 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.suspendCancellableCoroutine
 import kotlinx.coroutines.withContext
+import org.cheburnet.passdpi.store.PassDpiOptionsStorage
 import kotlin.coroutines.resume
 import kotlin.coroutines.resumeWithException
 
-class PassDpiVPNServiceLauncherMacos : PassDpiVPNServiceLauncher {
+class PassDpiVPNServiceLauncherMacos(
+    optionsStorage: PassDpiOptionsStorage,
+) : PassDpiVPNServiceLauncher {
     private val _isRunning = MutableStateFlow(ServiceLauncherState.Stopped)
     override val isRunning = _isRunning.asStateFlow()
 
@@ -19,9 +22,7 @@ class PassDpiVPNServiceLauncherMacos : PassDpiVPNServiceLauncher {
         return withContext(Dispatchers.IO) {
             suspendCancellableCoroutine { continuation ->
                 try {
-                    tunnelProvider.startTunnelWithOptions(
-                        mapOf(VPN_ARGS_KEY to args)
-                    ) { error ->
+                    tunnelProvider.startTunnelWithOptions(null) { error ->
                         val isSuccess = error == null
                         continuation.resume(isSuccess)
                     }
