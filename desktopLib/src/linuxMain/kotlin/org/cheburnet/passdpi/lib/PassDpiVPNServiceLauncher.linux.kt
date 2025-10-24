@@ -1,12 +1,12 @@
 package org.cheburnet.passdpi.lib
 
 class PassDpiVPNServiceLauncherLinux : PassDpiVPNServiceLauncher {
-    override fun startService(args: String): Boolean {
+    override suspend fun startService(args: String): Boolean {
         // TODO: Not implemented
         return false
     }
 
-    override fun stopService(): Boolean {
+    override suspend fun stopService(): Boolean {
         // TODO: Not implemented
         return false
     }
