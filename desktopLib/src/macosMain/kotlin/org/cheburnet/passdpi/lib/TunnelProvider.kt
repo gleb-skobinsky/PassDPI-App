@@ -3,6 +3,7 @@ package org.cheburnet.passdpi.lib
 import kotlinx.cinterop.ExperimentalForeignApi
 import kotlinx.coroutines.runBlocking
 import org.cheburnet.passdpi.store.PassDpiOptionsStorage
+import org.cheburnet.passdpi.tunnel.TunnelAccessor
 import platform.Foundation.NSDocumentDirectory
 import platform.Foundation.NSError
 import platform.Foundation.NSFileHandle
@@ -59,7 +60,7 @@ class TunnelProvider(
         |   port: ${options.port}
         |   udp: udp
         """.trimMargin("| ")
-        val filePath = writeConfigToFile(tun2socksConfig)
+        val configPath = writeConfigToFile(tun2socksConfig)
         val settings = NEPacketTunnelNetworkSettings(tunnelRemoteAddress = "10.10.10.10")
         val ipV4 = NEIPv4Settings(addresses = listOf("10.10.10.10"), subnetMasks = listOf("255.255.255.255"))
         ipV4.includedRoutes = listOf(NEIPv4Route.defaultRoute())
@@ -78,6 +79,10 @@ class TunnelProvider(
                 completionHandler(error)
             }
             val fd = obtainTunFd() ?: error("Couldn't obtain fd from packets")
+            TunnelAccessor.startTunnel(
+                configPath = configPath,
+                fd = fd
+            )
         }
     }
 
