@@ -35,6 +35,9 @@ kotlin {
         // macOS (for both x64 and arm64)
         val macosMain by creating {
             dependsOn(commonMain)
+            dependencies {
+                implementation(projects.tunnelInterop)
+            }
         }
 
         // MacOS variants share macosMain
