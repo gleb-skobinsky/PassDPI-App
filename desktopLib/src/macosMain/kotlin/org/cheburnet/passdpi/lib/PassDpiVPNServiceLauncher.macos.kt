@@ -16,7 +16,7 @@ class PassDpiVPNServiceLauncherMacos(
     private val _isRunning = MutableStateFlow(ServiceLauncherState.Stopped)
     override val isRunning = _isRunning.asStateFlow()
 
-    private val tunnelProvider = TunnelProvider()
+    private val tunnelProvider = TunnelProvider(optionsStorage)
 
     override suspend fun startService(args: String): Boolean {
         return withContext(Dispatchers.IO) {
@@ -39,4 +39,6 @@ class PassDpiVPNServiceLauncherMacos(
     }
 }
 
-actual fun PassDpiVPNServiceLauncher(): PassDpiVPNServiceLauncher = PassDpiVPNServiceLauncherMacos()
+actual fun PassDpiVPNServiceLauncher(
+    optionsStorage: PassDpiOptionsStorage,
+): PassDpiVPNServiceLauncher = PassDpiVPNServiceLauncherMacos(optionsStorage)

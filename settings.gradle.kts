@@ -35,5 +35,6 @@ plugins {
 include(
     ":composeApp",
     ":desktopLib",
-    ":optionsStorage"
+    ":optionsStorage",
+    ":tunnelInterop"
 )

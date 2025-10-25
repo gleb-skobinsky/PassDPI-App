@@ -1,6 +1,7 @@
 package org.cheburnet.passdpi.lib
 
 import kotlinx.coroutines.flow.StateFlow
+import org.cheburnet.passdpi.store.PassDpiOptionsStorage
 
 interface PassDpiVPNServiceLauncher {
     val isRunning: StateFlow<ServiceLauncherState>
@@ -9,4 +10,6 @@ interface PassDpiVPNServiceLauncher {
     suspend fun stopService(): Boolean
 }
 
-expect fun PassDpiVPNServiceLauncher(): PassDpiVPNServiceLauncher
+expect fun PassDpiVPNServiceLauncher(
+    optionsStorage: PassDpiOptionsStorage
+): PassDpiVPNServiceLauncher

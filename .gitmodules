@@ -1,0 +1,6 @@
+[submodule "submodules"]
+	path = submodules
+	url = https://github.com/heiher/hev-socks5-tunnel.git
+[submodule "gitsubmodules/hevsockstunnel"]
+	path = gitsubmodules/hevsockstunnel
+	url = https://github.com/heiher/hev-socks5-tunnel.git
