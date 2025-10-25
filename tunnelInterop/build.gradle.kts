@@ -1,3 +1,5 @@
+import org.jetbrains.kotlin.konan.target.KonanTarget
+
 plugins {
     alias(libs.plugins.kotlinMultiplatform)
 }
@@ -9,78 +11,69 @@ repositories {
     mavenCentral()
 }
 
-enum class TargetOs {
-    Windows,
-    Linux,
-    LinuxArm,
-    Macos,
-    MacosArm
-}
-
 kotlin {
     val hostOs = System.getProperty("os.name")
     val isArm64 = System.getProperty("os.arch") == "aarch64"
     val isMingwX64 = hostOs.startsWith("Windows")
-    var targetOs: TargetOs? = null
-    val nativeTarget = when {
-        hostOs == "Mac OS X" && isArm64 -> {
-            targetOs = TargetOs.MacosArm
-            macosArm64()
-        }
-
-        hostOs == "Mac OS X" && !isArm64 -> {
-            targetOs = TargetOs.Macos
-            macosX64()
+    val includedSystems = mutableSetOf<KonanTarget>()
+    val nativeTargets = when {
+        hostOs == "Mac OS X" -> {
+            listOf(
+                macosArm64().also { includedSystems.add(it.konanTarget) },
+                macosX64().also { includedSystems.add(it.konanTarget) }
+            )
         }
 
         hostOs == "Linux" && isArm64 -> {
-            targetOs = TargetOs.LinuxArm
-            linuxArm64()
+            listOf(linuxArm64().also { includedSystems.add(it.konanTarget) })
         }
 
         hostOs == "Linux" && !isArm64 -> {
-            targetOs = TargetOs.Linux
-            linuxX64()
+            listOf(linuxX64().also { includedSystems.add(it.konanTarget) })
         }
 
         isMingwX64 -> {
-            targetOs = TargetOs.Windows
-            mingwX64()
+            listOf(mingwX64().also { includedSystems.add(it.konanTarget) })
         }
 
         else -> throw GradleException("Host OS is not supported in Kotlin/Native.")
     }
-    if (targetOs != TargetOs.MacosArm) {
+    // Even if the host OS is different from the possible C interop target, we declare it
+    // in order that consuming modules can import the interop successfully
+    if (KonanTarget.MACOS_ARM64 !in includedSystems) {
         macosArm64()
     }
-    if (targetOs != TargetOs.Macos) {
+    if (KonanTarget.MACOS_X64 !in includedSystems) {
         macosX64()
     }
-    if (targetOs != TargetOs.LinuxArm) {
+    if (KonanTarget.LINUX_ARM64 !in includedSystems) {
         linuxArm64()
     }
-    if (targetOs != TargetOs.Linux) {
+    if (KonanTarget.LINUX_X64 !in includedSystems) {
         linuxX64()
     }
-    if (targetOs != TargetOs.Windows) {
+    if (KonanTarget.MINGW_X64 !in includedSystems) {
         mingwX64()
     }
 
-    nativeTarget.apply {
-        compilations.getByName("main") {
-            cinterops {
-                val libTun5socks by creating {
-                    definitionFile.set(
-                        project.file(
-                            when (targetOs) {
-                                TargetOs.MacosArm -> "src/nativeInterop/cinterop/hevsocks_macosarm.def"
-                                TargetOs.Macos -> "src/nativeInterop/cinterop/hevsocks_macos_x64.def"
-                                TargetOs.LinuxArm -> "" // TODO
-                                TargetOs.Linux -> "" // TODO
-                                TargetOs.Windows -> "" // TODO
-                            }
+    nativeTargets.forEach { nativeTarget ->
+        nativeTarget.apply {
+            compilations.getByName("main") {
+                cinterops {
+                    val libTun5socks by creating {
+                        definitionFile.set(
+                            project.file(
+                                when (nativeTarget.konanTarget) {
+                                    KonanTarget.MACOS_ARM64 -> "src/nativeInterop/cinterop/hevsocks_macosarm.def"
+                                    KonanTarget.MACOS_X64 -> "src/nativeInterop/cinterop/hevsocks_macos_x86_64.def"
+                                    KonanTarget.LINUX_ARM64 -> "" // TODO
+                                    KonanTarget.LINUX_X64 -> "" // TODO
+                                    KonanTarget.MINGW_X64 -> "" // TODO
+                                    else -> error("Unsupported target")
+                                }
+                            )
                         )
-                    )
+                    }
                 }
             }
         }
