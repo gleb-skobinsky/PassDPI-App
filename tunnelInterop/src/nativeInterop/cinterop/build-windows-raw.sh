@@ -5,7 +5,7 @@ set -e
 buildStatic()
 {
      echo "build for $1, $2"
-     x86_64-w64-mingw32-gcc -c src/*.c -Iinclude
+     make CC=gcc AR=ar LFLAGS="-Wl,-Bsymbolic-functions" static
 
      local OUTPUT_DIR="../bin_$1_$2"
      mkdir -p $OUTPUT_DIR
