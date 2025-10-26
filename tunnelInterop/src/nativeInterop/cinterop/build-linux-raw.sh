@@ -5,8 +5,7 @@ set -e
 buildStatic()
 {
      echo "build for $1, $2"
-     make CFLAGS="-arch $2" \
-          LFLAGS="-arch $2 -Wl,-Bsymbolic-functions" static
+     make LFLAGS="-Wl,-Bsymbolic-functions" static
 
      local OUTPUT_DIR="../bin_$1_$2"
      mkdir -p $OUTPUT_DIR
