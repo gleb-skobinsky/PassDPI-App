@@ -36,5 +36,6 @@ include(
     ":composeApp",
     ":vpnService",
     ":optionsStorage",
-    ":tunnelInterop"
+    ":tunnelInterop",
+    ":macosEntrypoint",
 )

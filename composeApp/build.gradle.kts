@@ -6,7 +6,7 @@ plugins {
     alias(libs.plugins.androidApplication)
     alias(libs.plugins.composeMultiplatform)
     alias(libs.plugins.composeCompiler)
-    alias(libs.plugins.composeHotReload)
+//    alias(libs.plugins.composeHotReload)
 }
 
 kotlin {
@@ -47,17 +47,14 @@ kotlin {
         commonMain.dependencies {
             implementation(compose.runtime)
             implementation(compose.foundation)
-            implementation(compose.material3)
-            implementation(compose.ui)
-            implementation(compose.components.resources)
-            implementation(compose.components.uiToolingPreview)
-            implementation(libs.androidx.lifecycle.viewmodelCompose)
-            implementation(libs.androidx.lifecycle.runtimeCompose)
-            implementation(libs.koin.core)
-            implementation(projects.optionsStorage)
-        }
-        commonTest.dependencies {
-            implementation(libs.kotlin.test)
+//            implementation(compose.material3)
+//            implementation(compose.ui)
+//            implementation(compose.components.resources)
+//            implementation(compose.components.uiToolingPreview)
+//            implementation(libs.androidx.lifecycle.viewmodelCompose)
+//            implementation(libs.androidx.lifecycle.runtimeCompose)
+//            implementation(libs.koin.core)
+//            implementation(projects.optionsStorage)
         }
         jvmMain.dependencies {
             implementation(compose.desktop.currentOs)
@@ -68,7 +65,7 @@ kotlin {
             implementation(projects.vpnService)
         }
         macosMain.dependencies {
-            implementation(projects.vpnService)
+//            implementation(projects.vpnService)
         }
     }
 }
@@ -114,21 +111,4 @@ compose.desktop {
             packageVersion = "1.0.0"
         }
     }
-}
-
-tasks.register<UniversalMacosFrameworkTask>("createUniversalMacosFramework") {
-    dependsOn(
-        ":composeApp:linkDebugFrameworkMacosArm64",
-        ":composeApp:linkDebugFrameworkMacosX64"
-    )
-
-    arm64FrameworkDir.set(
-        layout.projectDirectory.dir("build/bin/macosArm64/debugFramework/ComposeApp.framework")
-    )
-    x64FrameworkDir.set(
-        layout.projectDirectory.dir("build/bin/macosX64/debugFramework/ComposeApp.framework")
-    )
-    outputFrameworkDir.set(
-        layout.projectDirectory.dir("build/xcode-frameworks/Debug/macos-universal/ComposeApp.framework")
-    )
 }
