@@ -3,7 +3,7 @@ package org.cheburnet.passdpi.lib
 import kotlinx.cinterop.ExperimentalForeignApi
 import kotlinx.coroutines.runBlocking
 import org.cheburnet.passdpi.store.PassDpiOptionsStorage
-import org.cheburnet.passdpi.org.cheburnet.passdpi.tunnel.TunnelAccessor
+import org.cheburnet.passdpi.tunnel.TunnelAccessor
 import platform.Foundation.NSDocumentDirectory
 import platform.Foundation.NSError
 import platform.Foundation.NSFileHandle
