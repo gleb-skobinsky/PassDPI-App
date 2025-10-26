@@ -8,7 +8,6 @@
 
 /* Begin PBXFileReference section */
 		1C1C577488D0715EC874BFF2 /* PassDPI.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = PassDPI.app; sourceTree = BUILT_PRODUCTS_DIR; };
-		5A9EF7D12EAE613C008891CB /* PassDPI.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = PassDPI.app; sourceTree = BUILT_PRODUCTS_DIR; };
 /* End PBXFileReference section */
 
 /* Begin PBXFileSystemSynchronizedBuildFileExceptionSet section */
@@ -22,11 +21,6 @@
 /* End PBXFileSystemSynchronizedBuildFileExceptionSet section */
 
 /* Begin PBXFileSystemSynchronizedRootGroup section */
-		5A9EF7D22EAE613C008891CB /* PassDPI */ = {
-			isa = PBXFileSystemSynchronizedRootGroup;
-			path = PassDPI;
-			sourceTree = "<group>";
-		};
 		6F2DCD8D63C497C60202FA51 /* iosApp */ = {
 			isa = PBXFileSystemSynchronizedRootGroup;
 			exceptions = (
@@ -50,13 +44,6 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
-		5A9EF7CE2EAE613C008891CB /* Frameworks */ = {
-			isa = PBXFrameworksBuildPhase;
-			buildActionMask = 2147483647;
-			files = (
-			);
-			runOnlyForDeploymentPostprocessing = 0;
-		};
 /* End PBXFrameworksBuildPhase section */
 
 /* Begin PBXGroup section */
@@ -64,7 +51,6 @@
 			isa = PBXGroup;
 			children = (
 				1C1C577488D0715EC874BFF2 /* PassDPI.app */,
-				5A9EF7D12EAE613C008891CB /* PassDPI.app */,
 			);
 			name = Products;
 			sourceTree = "<group>";
@@ -74,7 +60,6 @@
 			children = (
 				80120CE1E239BB3C1611277D /* Configuration */,
 				6F2DCD8D63C497C60202FA51 /* iosApp */,
-				5A9EF7D22EAE613C008891CB /* PassDPI */,
 				1EB3FCC71A7A89C23F8A9058 /* Products */,
 			);
 			sourceTree = "<group>";
@@ -105,29 +90,6 @@
 			productReference = 1C1C577488D0715EC874BFF2 /* PassDPI.app */;
 			productType = "com.apple.product-type.application";
 		};
-		5A9EF7D02EAE613C008891CB /* PassDPI */ = {
-			isa = PBXNativeTarget;
-			buildConfigurationList = 5A9EF7DB2EAE613C008891CB /* Build configuration list for PBXNativeTarget "PassDPI" */;
-			buildPhases = (
-				5A9EF80B2EAE9242008891CB /* Compile Kotlin Framework */,
-				5A9EF7CD2EAE613C008891CB /* Sources */,
-				5A9EF7CE2EAE613C008891CB /* Frameworks */,
-				5A9EF7CF2EAE613C008891CB /* Resources */,
-			);
-			buildRules = (
-			);
-			dependencies = (
-			);
-			fileSystemSynchronizedGroups = (
-				5A9EF7D22EAE613C008891CB /* PassDPI */,
-			);
-			name = PassDPI;
-			packageProductDependencies = (
-			);
-			productName = PassDPI;
-			productReference = 5A9EF7D12EAE613C008891CB /* PassDPI.app */;
-			productType = "com.apple.product-type.application";
-		};
 /* End PBXNativeTarget section */
 
 /* Begin PBXProject section */
@@ -140,9 +102,6 @@
 				TargetAttributes = {
 					2E192715E74C653ADD5912E8 = {
 						CreatedOnToolsVersion = 16.2;
-					};
-					5A9EF7D02EAE613C008891CB = {
-						CreatedOnToolsVersion = 26.0;
 					};
 				};
 			};
@@ -161,19 +120,11 @@
 			projectRoot = "";
 			targets = (
 				2E192715E74C653ADD5912E8 /* iosApp */,
-				5A9EF7D02EAE613C008891CB /* PassDPI */,
 			);
 		};
 /* End PBXProject section */
 
 /* Begin PBXResourcesBuildPhase section */
-		5A9EF7CF2EAE613C008891CB /* Resources */ = {
-			isa = PBXResourcesBuildPhase;
-			buildActionMask = 2147483647;
-			files = (
-			);
-			runOnlyForDeploymentPostprocessing = 0;
-		};
 		FE96D876BC3626EA74554479 /* Resources */ = {
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
@@ -184,25 +135,6 @@
 /* End PBXResourcesBuildPhase section */
 
 /* Begin PBXShellScriptBuildPhase section */
-		5A9EF80B2EAE9242008891CB /* Compile Kotlin Framework */ = {
-			isa = PBXShellScriptBuildPhase;
-			alwaysOutOfDate = 1;
-			buildActionMask = 2147483647;
-			files = (
-			);
-			inputFileListPaths = (
-			);
-			inputPaths = (
-			);
-			name = "Compile Kotlin Framework";
-			outputFileListPaths = (
-			);
-			outputPaths = (
-			);
-			runOnlyForDeploymentPostprocessing = 0;
-			shellPath = /bin/sh;
-			shellScript = "if [ \"YES\" = \"$OVERRIDE_KOTLIN_BUILD_IDE_SUPPORTED\" ]; then\n  echo \"Skipping Gradle build task invocation due to OVERRIDE_KOTLIN_BUILD_IDE_SUPPORTED environment variable set to \\\"YES\\\"\"\n  exit 0\nfi\ncd \"$SRCROOT/..\"\n./gradlew :composeApp:embedAndSignAppleFrameworkForXcode\n";
-		};
 		987516348CF21C5ECD122373 /* Compile Kotlin Framework */ = {
 			isa = PBXShellScriptBuildPhase;
 			alwaysOutOfDate = 1;
@@ -225,13 +157,6 @@
 /* End PBXShellScriptBuildPhase section */
 
 /* Begin PBXSourcesBuildPhase section */
-		5A9EF7CD2EAE613C008891CB /* Sources */ = {
-			isa = PBXSourcesBuildPhase;
-			buildActionMask = 2147483647;
-			files = (
-			);
-			runOnlyForDeploymentPostprocessing = 0;
-		};
 		951D0BD85E0DB93E8B464088 /* Sources */ = {
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
@@ -297,72 +222,6 @@
 				SDKROOT = iphoneos;
 				SWIFT_COMPILATION_MODE = wholemodule;
 				VALIDATE_PRODUCT = YES;
-			};
-			name = Release;
-		};
-		5A9EF7D92EAE613C008891CB /* Debug */ = {
-			isa = XCBuildConfiguration;
-			buildSettings = {
-				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
-				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
-				CODE_SIGN_STYLE = Automatic;
-				COMBINE_HIDPI_IMAGES = YES;
-				CURRENT_PROJECT_VERSION = 1;
-				ENABLE_APP_SANDBOX = YES;
-				ENABLE_PREVIEWS = YES;
-				ENABLE_USER_SCRIPT_SANDBOXING = NO;
-				ENABLE_USER_SELECTED_FILES = readonly;
-				GENERATE_INFOPLIST_FILE = YES;
-				INFOPLIST_KEY_NSHumanReadableCopyright = "";
-				LD_RUNPATH_SEARCH_PATHS = (
-					"$(inherited)",
-					"@executable_path/../Frameworks",
-				);
-				MACOSX_DEPLOYMENT_TARGET = 15.7;
-				MARKETING_VERSION = 1.0;
-				PRODUCT_BUNDLE_IDENTIFIER = org.cheburnet.passdpi.PassDPI;
-				PRODUCT_NAME = "$(TARGET_NAME)";
-				REGISTER_APP_GROUPS = YES;
-				SDKROOT = macosx;
-				STRING_CATALOG_GENERATE_SYMBOLS = YES;
-				SWIFT_APPROACHABLE_CONCURRENCY = YES;
-				SWIFT_DEFAULT_ACTOR_ISOLATION = MainActor;
-				SWIFT_EMIT_LOC_STRINGS = YES;
-				SWIFT_UPCOMING_FEATURE_MEMBER_IMPORT_VISIBILITY = YES;
-				SWIFT_VERSION = 5.0;
-			};
-			name = Debug;
-		};
-		5A9EF7DA2EAE613C008891CB /* Release */ = {
-			isa = XCBuildConfiguration;
-			buildSettings = {
-				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
-				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
-				CODE_SIGN_STYLE = Automatic;
-				COMBINE_HIDPI_IMAGES = YES;
-				CURRENT_PROJECT_VERSION = 1;
-				ENABLE_APP_SANDBOX = YES;
-				ENABLE_PREVIEWS = YES;
-				ENABLE_USER_SCRIPT_SANDBOXING = NO;
-				ENABLE_USER_SELECTED_FILES = readonly;
-				GENERATE_INFOPLIST_FILE = YES;
-				INFOPLIST_KEY_NSHumanReadableCopyright = "";
-				LD_RUNPATH_SEARCH_PATHS = (
-					"$(inherited)",
-					"@executable_path/../Frameworks",
-				);
-				MACOSX_DEPLOYMENT_TARGET = 15.7;
-				MARKETING_VERSION = 1.0;
-				PRODUCT_BUNDLE_IDENTIFIER = org.cheburnet.passdpi.PassDPI;
-				PRODUCT_NAME = "$(TARGET_NAME)";
-				REGISTER_APP_GROUPS = YES;
-				SDKROOT = macosx;
-				STRING_CATALOG_GENERATE_SYMBOLS = YES;
-				SWIFT_APPROACHABLE_CONCURRENCY = YES;
-				SWIFT_DEFAULT_ACTOR_ISOLATION = MainActor;
-				SWIFT_EMIT_LOC_STRINGS = YES;
-				SWIFT_UPCOMING_FEATURE_MEMBER_IMPORT_VISIBILITY = YES;
-				SWIFT_VERSION = 5.0;
 			};
 			name = Release;
 		};
@@ -490,15 +349,6 @@
 /* End XCBuildConfiguration section */
 
 /* Begin XCConfigurationList section */
-		5A9EF7DB2EAE613C008891CB /* Build configuration list for PBXNativeTarget "PassDPI" */ = {
-			isa = XCConfigurationList;
-			buildConfigurations = (
-				5A9EF7D92EAE613C008891CB /* Debug */,
-				5A9EF7DA2EAE613C008891CB /* Release */,
-			);
-			defaultConfigurationIsVisible = 0;
-			defaultConfigurationName = Release;
-		};
 		64F7DDA03F3E25D84C004113 /* Build configuration list for PBXProject "iosApp" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (
