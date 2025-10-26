@@ -101,7 +101,7 @@ class TunnelProvider(
         reason: NEProviderStopReason,
         completionHandler: () -> Unit
     ) {
-
+        TunnelAccessor.stopTunnel()
     }
 
     private fun writeConfigToFile(

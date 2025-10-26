@@ -27,17 +27,8 @@ buildStatic()
 
 cd hev-socks5-tunnel
 
-#buildStatic iphoneos arm64 15.0
-#buildStatic iphonesimulator x86_64 15.0
-#buildStatic iphonesimulator arm64 15.0
-# mergeStatic iphonesimulator x86_64 arm64
-
-# keep same with flutter
 buildStatic macosx x86_64 10.14
 buildStatic macosx arm64 10.14
-# mergeStatic macosx x86_64 arm64
-
-#buildStatic appletvos arm64 17.0
-#buildStatic appletvsimulator x86_64 17.0
-#buildStatic appletvsimulator arm64 17.0
-#mergeStatic appletvsimulator x86_64 arm64
+buildStatic iphoneos arm64 15.0
+buildStatic iphonesimulator x86_64 15.0
+buildStatic iphonesimulator arm64 15.0

@@ -1,0 +1,8 @@
+headers = hev-main.h
+headerFilter = hev-main.h
+package = org.cheburnet.passdpi.tunnelinterop
+compilerOpts = -Isrc/nativeInterop/cinterop/hev-socks5-tunnel/src
+# linkerOpts = -Lhev-socks5-tunnel/output -lhev-socks5-tunnel
+
+staticLibraries.ios = libhev-socks5-tunnel.a
+libraryPaths.ios = src/nativeInterop/cinterop/bin_ios_arm64
