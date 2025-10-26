@@ -120,12 +120,5 @@ class TunnelProvider(
         return configUrl.absoluteString!!
     }
 
-    private fun startNativeTunnel(
-        configPath: String,
-        tunnelFd: Int,
-    ) {
-
-    }
-
     private fun configFileError(): Nothing = error("Could not create config file")
 }
