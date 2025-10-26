@@ -7,7 +7,7 @@ struct ContentView: View {
             Image(systemName: "globe")
                 .imageScale(.large)
                 .foregroundStyle(.tint)
-            Text(Platform_macosKt.getPlatform().name)
+            Text("Hello world!")
         }
         .padding()
     }

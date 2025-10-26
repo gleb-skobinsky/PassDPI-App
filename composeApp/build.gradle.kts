@@ -47,14 +47,14 @@ kotlin {
         commonMain.dependencies {
             implementation(compose.runtime)
             implementation(compose.foundation)
-//            implementation(compose.material3)
-//            implementation(compose.ui)
-//            implementation(compose.components.resources)
-//            implementation(compose.components.uiToolingPreview)
-//            implementation(libs.androidx.lifecycle.viewmodelCompose)
-//            implementation(libs.androidx.lifecycle.runtimeCompose)
-//            implementation(libs.koin.core)
-//            implementation(projects.optionsStorage)
+            implementation(compose.material3)
+            implementation(compose.ui)
+            implementation(compose.components.resources)
+            implementation(compose.components.uiToolingPreview)
+            implementation(libs.androidx.lifecycle.viewmodelCompose)
+            implementation(libs.androidx.lifecycle.runtimeCompose)
+            implementation(libs.koin.core)
+            implementation(projects.optionsStorage)
         }
         jvmMain.dependencies {
             implementation(compose.desktop.currentOs)
@@ -65,7 +65,7 @@ kotlin {
             implementation(projects.vpnService)
         }
         macosMain.dependencies {
-//            implementation(projects.vpnService)
+            implementation(projects.vpnService)
         }
     }
 }
