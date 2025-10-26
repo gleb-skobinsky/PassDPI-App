@@ -15,7 +15,6 @@ import platform.Foundation.NSUTF8StringEncoding
 import platform.Foundation.NSUserDomainMask
 import platform.Foundation.dataUsingEncoding
 import platform.Foundation.fileDescriptor
-import platform.Foundation.valueForKey
 import platform.Foundation.valueForKeyPath
 import platform.Foundation.writeToURL
 import platform.NetworkExtension.NEDNSSettings
@@ -26,8 +25,6 @@ import platform.NetworkExtension.NEIPv6Settings
 import platform.NetworkExtension.NEPacketTunnelNetworkSettings
 import platform.NetworkExtension.NEPacketTunnelProvider
 import platform.NetworkExtension.NEProviderStopReason
-import platform.osx.raw
-import platform.posix.err
 
 internal const val VPN_ARGS_KEY = "PASSVPN_ARGS"
 internal const val PORT_KEY = "PASSVPN_PORT"
