@@ -5,4 +5,4 @@ compilerOpts = -Isrc/nativeInterop/cinterop/hev-socks5-tunnel/src
 # linkerOpts = -Lhev-socks5-tunnel/output -lhev-socks5-tunnel
 
 staticLibraries.ios = libhev-socks5-tunnel.a
-libraryPaths.ios = src/nativeInterop/cinterop/bin_iphoneos_arm64
+libraryPaths.ios = src/nativeInterop/cinterop/bin_iphonesimulator_arm64

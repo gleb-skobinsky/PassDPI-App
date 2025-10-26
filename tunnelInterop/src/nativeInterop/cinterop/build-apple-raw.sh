@@ -30,5 +30,4 @@ cd hev-socks5-tunnel
 buildStatic macosx x86_64 10.14
 buildStatic macosx arm64 10.14
 buildStatic iphoneos arm64 15.0
-buildStatic iphonesimulator x86_64 15.0
 buildStatic iphonesimulator arm64 15.0
