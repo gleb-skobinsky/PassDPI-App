@@ -44,6 +44,8 @@ kotlin {
             implementation(compose.components.uiToolingPreview)
             implementation(libs.androidx.lifecycle.viewmodelCompose)
             implementation(libs.androidx.lifecycle.runtimeCompose)
+            implementation(libs.koin.core)
+            implementation(projects.optionsStorage)
         }
         commonTest.dependencies {
             implementation(libs.kotlin.test)
@@ -51,7 +53,13 @@ kotlin {
         jvmMain.dependencies {
             implementation(compose.desktop.currentOs)
             implementation(libs.kotlinx.coroutinesSwing)
-            implementation(projects.desktopLib)
+            implementation(projects.vpnService)
+        }
+        iosMain.dependencies {
+            implementation(projects.vpnService)
+        }
+        macosMain.dependencies {
+            implementation(projects.vpnService)
         }
     }
 }

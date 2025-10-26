@@ -34,7 +34,7 @@ plugins {
 
 include(
     ":composeApp",
-    ":desktopLib",
+    ":vpnService",
     ":optionsStorage",
     ":tunnelInterop"
 )

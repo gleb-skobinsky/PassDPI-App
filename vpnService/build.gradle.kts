@@ -9,6 +9,8 @@ kotlin {
 
     macosArm64()
     macosX64()
+    iosArm64()
+    iosSimulatorArm64()
 
     @Suppress("unused")
     sourceSets {
@@ -33,7 +35,7 @@ kotlin {
         }
 
         // macOS (for both x64 and arm64)
-        val macosMain by creating {
+        val appleMain by creating {
             dependsOn(commonMain)
             dependencies {
                 implementation(projects.tunnelInterop)
@@ -41,8 +43,10 @@ kotlin {
         }
 
         // MacOS variants share macosMain
-        val macosX64Main by getting { dependsOn(macosMain) }
-        val macosArm64Main by getting { dependsOn(macosMain) }
+        val macosX64Main by getting { dependsOn(appleMain) }
+        val macosArm64Main by getting { dependsOn(appleMain) }
+        val iosSimulatorArm64Main by getting { dependsOn(appleMain) }
+        val iosArm64Main by getting { dependsOn(appleMain) }
     }
 }
 
