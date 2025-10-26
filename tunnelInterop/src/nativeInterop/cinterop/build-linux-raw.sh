@@ -11,7 +11,7 @@ buildStatic()
      mkdir -p $OUTPUT_DIR
      local OUTPUT_ARCH_FILE="$OUTPUT_DIR/libhev-socks5-tunnel.a"
 
-     libtool -o $OUTPUT_ARCH_FILE \
+     ar rcs $OUTPUT_ARCH_FILE \
                    bin/libhev-socks5-tunnel.a \
                    third-part/lwip/bin/liblwip.a \
                    third-part/yaml/bin/libyaml.a \
