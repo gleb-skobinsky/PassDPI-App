@@ -5,4 +5,4 @@ compilerOpts = -Isrc/nativeInterop/cinterop/hev-socks5-tunnel/src
 # linkerOpts = -Lhev-socks5-tunnel/output -lhev-socks5-tunnel
 
 staticLibraries.osx = libhev-socks5-tunnel.a
-libraryPaths.osx = src/nativeInterop/cinterop/hev-socks5-tunnel/output_macosx_x86_64
+libraryPaths.osx = src/nativeInterop/cinterop/bin_macosx_x86_64

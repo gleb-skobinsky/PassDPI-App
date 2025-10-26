@@ -12,49 +12,13 @@ repositories {
 }
 
 kotlin {
-    val hostOs = System.getProperty("os.name")
-    val isArm64 = System.getProperty("os.arch") == "aarch64"
-    val isMingwX64 = hostOs.startsWith("Windows")
-    val includedSystems = mutableSetOf<KonanTarget>()
-    val nativeTargets = when {
-        hostOs == "Mac OS X" -> {
-            listOf(
-                macosArm64().also { includedSystems.add(it.konanTarget) },
-                macosX64().also { includedSystems.add(it.konanTarget) }
-            )
-        }
-
-        hostOs == "Linux" && isArm64 -> {
-            listOf(linuxArm64().also { includedSystems.add(it.konanTarget) })
-        }
-
-        hostOs == "Linux" && !isArm64 -> {
-            listOf(linuxX64().also { includedSystems.add(it.konanTarget) })
-        }
-
-        isMingwX64 -> {
-            listOf(mingwX64().also { includedSystems.add(it.konanTarget) })
-        }
-
-        else -> throw GradleException("Host OS is not supported in Kotlin/Native.")
-    }
-    // Even if the host OS is different from the possible C interop target, we declare it
-    // in order that consuming modules can import the interop successfully
-    if (KonanTarget.MACOS_ARM64 !in includedSystems) {
-        macosArm64()
-    }
-    if (KonanTarget.MACOS_X64 !in includedSystems) {
-        macosX64()
-    }
-    if (KonanTarget.LINUX_ARM64 !in includedSystems) {
-        linuxArm64()
-    }
-    if (KonanTarget.LINUX_X64 !in includedSystems) {
-        linuxX64()
-    }
-    if (KonanTarget.MINGW_X64 !in includedSystems) {
+    val nativeTargets = listOf(
+        macosArm64(),
+        macosX64(),
+        linuxArm64(),
+        linuxX64(),
         mingwX64()
-    }
+    )
 
     nativeTargets.forEach { nativeTarget ->
         nativeTarget.apply {
@@ -66,9 +30,9 @@ kotlin {
                                 when (nativeTarget.konanTarget) {
                                     KonanTarget.MACOS_ARM64 -> "src/nativeInterop/cinterop/hevsocks_macosarm.def"
                                     KonanTarget.MACOS_X64 -> "src/nativeInterop/cinterop/hevsocks_macos_x86_64.def"
-                                    KonanTarget.LINUX_ARM64 -> "" // TODO
-                                    KonanTarget.LINUX_X64 -> "" // TODO
-                                    KonanTarget.MINGW_X64 -> "" // TODO
+                                    KonanTarget.LINUX_ARM64 -> "src/nativeInterop/cinterop/hevsocks_linuxarm.def"
+                                    KonanTarget.LINUX_X64 -> "src/nativeInterop/cinterop/hevsocks_linux_x86_64.def"
+                                    KonanTarget.MINGW_X64 -> "src/nativeInterop/cinterop/hevsocks_mingw.def"
                                     else -> error("Unsupported target")
                                 }
                             )

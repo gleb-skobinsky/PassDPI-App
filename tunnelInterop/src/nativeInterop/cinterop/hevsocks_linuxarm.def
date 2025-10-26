@@ -4,5 +4,5 @@ package = org.cheburnet.passdpi.tunnelinterop
 compilerOpts = -Isrc/nativeInterop/cinterop/hev-socks5-tunnel/src
 # linkerOpts = -Lhev-socks5-tunnel/output -lhev-socks5-tunnel
 
-staticLibraries.osx = libhev-socks5-tunnel.a
-libraryPaths.osx = src/nativeInterop/cinterop/bin_macosx_arm64
+staticLibraries.linux = libhev-socks5-tunnel.a
+libraryPaths.linux = src/nativeInterop/cinterop/bin_linux_arm64
