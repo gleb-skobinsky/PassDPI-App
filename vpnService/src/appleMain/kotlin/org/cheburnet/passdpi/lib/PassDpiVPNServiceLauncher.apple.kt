@@ -22,7 +22,7 @@ class PassDpiVPNServiceLauncherMacos(
     private val mutex = Mutex()
     private val singleThreadedDispatcher = Dispatchers.IO.limitedParallelism(1)
 
-    private val tunnelProvider = TunnelProvider(optionsStorage)
+    private val tunnelProvider by lazy { TunnelProvider(optionsStorage) }
 
     override suspend fun startService(): Boolean {
         return withContext(singleThreadedDispatcher) {
