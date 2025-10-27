@@ -4,7 +4,7 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import org.cheburnet.passdpi.store.PassDpiOptionsStorage
 
-class PassDpiVPNServiceLauncherWindows : PassDpiVPNServiceLauncher {
+class PassDpiVPNServiceLauncherAndroid : PassDpiVPNServiceLauncher {
     private val _isRunning = MutableStateFlow(ServiceLauncherState.Stopped)
     override val isRunning = _isRunning.asStateFlow()
 
@@ -21,4 +21,4 @@ class PassDpiVPNServiceLauncherWindows : PassDpiVPNServiceLauncher {
 
 actual fun PassDpiVPNServiceLauncher(
     optionsStorage: PassDpiOptionsStorage,
-): PassDpiVPNServiceLauncher = PassDpiVPNServiceLauncherWindows()
+): PassDpiVPNServiceLauncher = PassDpiVPNServiceLauncherAndroid()

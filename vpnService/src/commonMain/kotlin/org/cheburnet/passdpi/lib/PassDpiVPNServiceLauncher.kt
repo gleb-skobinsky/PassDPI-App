@@ -5,7 +5,7 @@ import org.cheburnet.passdpi.store.PassDpiOptionsStorage
 
 interface PassDpiVPNServiceLauncher {
     val isRunning: StateFlow<ServiceLauncherState>
-    suspend fun startService(args: String): Boolean
+    suspend fun startService(): Boolean
 
     suspend fun stopService(): Boolean
 }

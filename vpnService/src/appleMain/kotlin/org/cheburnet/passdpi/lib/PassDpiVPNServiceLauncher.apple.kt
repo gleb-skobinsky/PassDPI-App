@@ -24,7 +24,7 @@ class PassDpiVPNServiceLauncherMacos(
 
     private val tunnelProvider = TunnelProvider(optionsStorage)
 
-    override suspend fun startService(args: String): Boolean {
+    override suspend fun startService(): Boolean {
         return withContext(singleThreadedDispatcher) {
             mutex.withLock {
                 suspendCancellableCoroutine { continuation ->

@@ -1,11 +1,20 @@
+import org.jetbrains.kotlin.gradle.dsl.JvmTarget
+
 plugins {
     alias(libs.plugins.kotlinMultiplatform)
+    alias(libs.plugins.androidLibrary)
 }
 
 kotlin {
 
     // Windows and Linux are JVM for now.
     jvm()
+
+    androidTarget {
+        compilerOptions {
+            jvmTarget.set(JvmTarget.JVM_11)
+        }
+    }
 
     macosArm64()
     macosX64()
@@ -50,31 +59,21 @@ kotlin {
     }
 }
 
-tasks.register<Exec>("buildHevSocks5Tunnel") {
-    group = "build"
-    description = "Build the hev-socks5-tunnel native library"
+android {
+    namespace = "org.cheburnet.passdpi.vpnService"
+    compileSdk = libs.versions.android.compileSdk.get().toInt()
 
-    // Path to the submodule
-    val submoduleDir = project.file("gitsubmodules/hevsockstunnel")
-
-    // Output directory (optional)
-    val buildDir = File(submoduleDir, "build")
-
-    workingDir = submoduleDir
-
-    // Clean + build
-    commandLine("make", "clean")
-    commandLine("make")
-
-    doFirst {
-        println("🛠️  Building hev-socks5-tunnel C library in: $submoduleDir")
+    defaultConfig {
+        minSdk = libs.versions.android.minSdk.get().toInt()
+        targetSdk = libs.versions.android.targetSdk.get().toInt()
     }
-
-    doLast {
-        if (!File(buildDir, "libhev_socks5_tunnel.a").exists()) {
-            throw GradleException("❌ libhev_socks5_tunnel.a was not built! Check your Makefile.")
-        } else {
-            println("✅ hev-socks5-tunnel build completed successfully.")
+    packaging {
+        resources {
+            excludes += "/META-INF/{AL2.0,LGPL2.1}"
         }
+    }
+    compileOptions {
+        sourceCompatibility = JavaVersion.VERSION_11
+        targetCompatibility = JavaVersion.VERSION_11
     }
 }

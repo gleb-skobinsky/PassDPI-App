@@ -1,23 +1,23 @@
 package org.cheburnet.passdpi
 
-import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.material3.Button
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.ui.Alignment
-import androidx.compose.ui.Modifier
+import androidx.navigation.compose.NavHost
+import androidx.navigation.compose.composable
+import androidx.navigation.compose.rememberNavController
+import org.cheburnet.passdpi.navigation.Screens
+import org.cheburnet.passdpi.presentation.mainScreen.MainScreen
 
 @Composable
 fun App() {
+    val navController = rememberNavController()
     MaterialTheme {
-        Box(
-            modifier = Modifier.fillMaxSize(),
-            contentAlignment = Alignment.Center
+        NavHost(
+            navController = navController,
+            startDestination = Screens.MainScreen
         ) {
-            Button(onClick = {}) {
-                Text("Connect")
+            composable<Screens.MainScreen> {
+                MainScreen()
             }
         }
     }
