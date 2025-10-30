@@ -1,5 +1,3 @@
-import org.jetbrains.kotlin.konan.target.KonanTarget
-
 plugins {
     alias(libs.plugins.kotlinMultiplatform)
 }
@@ -22,6 +20,7 @@ kotlin {
         iosSimulatorArm64()
     )
 
+    /*
     nativeTargets.forEach { nativeTarget ->
         nativeTarget.apply {
             compilations.getByName("main") {
@@ -46,24 +45,5 @@ kotlin {
             }
         }
     }
-}
-
-tasks.register<Exec>("buildHevSocks5TunnelUniversal") {
-    group = "build"
-    description = "Build universal macOS binary for hev-socks5-tunnel"
-
-    val submoduleDir = project.file("hev-socks5-tunnel")
-
-    doFirst {
-        println("⚙️ Building macOS universal binary...")
-    }
-
-    commandLine(
-        "bash", "-c",
-        """
-        cd $submoduleDir
-        make clean
-        ./build-apple-raw.sh
-        """.trimIndent()
-    )
+     */
 }
