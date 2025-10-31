@@ -7,3 +7,6 @@
 [submodule "tunnelInterop/src/nativeInterop/cinterop/hev-socks5-tunnel"]
 	path = tunnelInterop/src/nativeInterop/cinterop/hev-socks5-tunnel
 	url = https://github.com/heiher/hev-socks5-tunnel.git
+[submodule "byeDpiProxy/src/nativeInterop/cinterop/byedpi"]
+	path = byeDpiProxy/src/nativeInterop/cinterop/byedpi
+	url = https://github.com/gleb-skobinsky/byedpi_apple.git

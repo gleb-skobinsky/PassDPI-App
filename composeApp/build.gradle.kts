@@ -57,7 +57,7 @@ kotlin {
             implementation(libs.androidx.lifecycle.runtimeCompose)
             implementation(libs.koin.core)
             implementation(libs.koin.compose.viewmodel)
-            implementation(libs.koin.compose.navigation)
+            // implementation(libs.koin.compose.navigation)
             implementation(projects.optionsStorage)
             implementation(projects.vpnService)
             implementation(libs.compose.multiplatform.navigation)

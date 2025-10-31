@@ -1,3 +1,5 @@
+import org.jetbrains.kotlin.konan.target.KonanTarget
+
 plugins {
     alias(libs.plugins.kotlinMultiplatform)
 }
@@ -20,7 +22,6 @@ kotlin {
         iosSimulatorArm64()
     )
 
-    /*
     nativeTargets.forEach { nativeTarget ->
         nativeTarget.apply {
             compilations.getByName("main") {
@@ -45,5 +46,4 @@ kotlin {
             }
         }
     }
-     */
 }
