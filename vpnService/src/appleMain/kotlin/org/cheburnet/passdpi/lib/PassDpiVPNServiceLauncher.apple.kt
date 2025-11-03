@@ -26,8 +26,6 @@ class PassDpiVPNServiceLauncherMacos() : PassDpiVPNServiceLauncher {
     private val mutex = Mutex()
     private val singleThreadedDispatcher = Dispatchers.IO.limitedParallelism(1)
 
-    private val tunnelProvider = TunnelProvider()
-
     private val tunnelManager by lazy {
         NETunnelProviderManager().apply {
             val proto = NETunnelProviderProtocol()
