@@ -4,6 +4,8 @@ import kotlinx.cinterop.ExperimentalForeignApi
 import kotlinx.coroutines.runBlocking
 import org.cheburnet.passdpi.store.PassDpiOptionsStorage
 import org.cheburnet.passdpi.tunnel.TunnelAccessor
+import org.koin.core.component.KoinComponent
+import org.koin.core.component.get
 import platform.Foundation.NSDocumentDirectory
 import platform.Foundation.NSError
 import platform.Foundation.NSFileHandle
@@ -26,16 +28,17 @@ import platform.NetworkExtension.NEPacketTunnelNetworkSettings
 import platform.NetworkExtension.NEPacketTunnelProvider
 import platform.NetworkExtension.NEProviderStopReason
 
-internal const val VPN_ARGS_KEY = "PASSVPN_ARGS"
-internal const val PORT_KEY = "PASSVPN_PORT"
 internal const val CONFIG_FILE_NAME = "config"
 internal const val CONFIG_EXT = "tmp"
 private const val CONFIG_FULL_NAME = "$CONFIG_FILE_NAME.$CONFIG_EXT"
 
+private object OptionsStorageProvider : KoinComponent {
+    fun getStorage(): PassDpiOptionsStorage = get()
+}
+
 @OptIn(ExperimentalForeignApi::class)
-class TunnelProvider(
-    private val optionsStorage: PassDpiOptionsStorage,
-) : NEPacketTunnelProvider() {
+class TunnelProvider() : NEPacketTunnelProvider() {
+    private val optionsStorage: PassDpiOptionsStorage = OptionsStorageProvider.getStorage()
 
     private val keyCandidates = listOf(
         "socket.fileDescriptor",
@@ -59,19 +62,28 @@ class TunnelProvider(
         """.trimMargin("| ")
         val configPath = writeConfigToFile(tun2socksConfig)
         val settings = NEPacketTunnelNetworkSettings(tunnelRemoteAddress = "10.10.10.10")
-        val ipV4 = NEIPv4Settings(addresses = listOf("10.10.10.10"), subnetMasks = listOf("255.255.255.255"))
+        val ipV4 = NEIPv4Settings(
+            addresses = listOf("10.10.10.10"),
+            subnetMasks = listOf("255.255.255.255")
+        )
         ipV4.includedRoutes = listOf(NEIPv4Route.defaultRoute())
         settings.IPv4Settings = ipV4
 
         if (options.enableIpV6) {
-            val ipV6 = NEIPv6Settings(addresses = listOf("fd00::1"), networkPrefixLengths = listOf(128))
+            val ipV6 = NEIPv6Settings(
+                addresses = listOf("fd00::1"),
+                networkPrefixLengths = listOf(128)
+            )
             ipV6.includedRoutes = listOf(NEIPv6Route.defaultRoute())
         }
 
         val dnsSettings = NEDNSSettings(servers = listOf(options.dnsIp))
         settings.DNSSettings = dnsSettings
+        println("Settings setup complete")
+
 
         setTunnelNetworkSettings(settings) { error ->
+            println("Error after settings apply: $error")
             if (error != null) {
                 completionHandler(error)
             }
@@ -80,6 +92,7 @@ class TunnelProvider(
                 configPath = configPath,
                 fd = fd
             )
+            completionHandler(null)
         }
     }
 

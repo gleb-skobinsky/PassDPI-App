@@ -3,6 +3,7 @@ package org.cheburnet.passdpi.presentation.mainScreen
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Settings
 import androidx.compose.material3.Button
@@ -15,9 +16,11 @@ import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import org.cheburnet.passdpi.lib.ServiceLauncherState
@@ -28,7 +31,7 @@ import org.koin.compose.viewmodel.koinViewModel
 @Composable
 internal fun MainScreen() {
     val viewModel: MainViewModel = koinViewModel()
-    val state by viewModel.state.collectAsStateWithLifecycle()
+    val state by viewModel.state.collectAsState()
 
     Scaffold(
         containerColor = MaterialTheme.colorScheme.background,
@@ -55,12 +58,18 @@ internal fun MainScreen() {
             contentAlignment = Alignment.Center
         ) {
             Button(
+                modifier = Modifier.width(180.dp),
                 onClick = {
                     viewModel.toggleVpn()
                 }
             ) {
                 when (state.vpnStatus) {
-                    ServiceLauncherState.Loading -> CircularProgressIndicator()
+                    ServiceLauncherState.Loading -> {
+                        CircularProgressIndicator(
+                            color = Color.White,
+                            modifier = Modifier.size(32.dp)
+                        )
+                    }
                     ServiceLauncherState.Running -> Text("Disconnect")
                     ServiceLauncherState.Stopped -> Text("Connect")
                 }
