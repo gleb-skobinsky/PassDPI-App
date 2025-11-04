@@ -3,6 +3,7 @@ package org.cheburnet.passdpi.presentation.mainScreen
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import kotlinx.coroutines.Job
+import kotlinx.coroutines.ensureActive
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.launchIn
@@ -24,10 +25,15 @@ class MainViewModel(
         if (toggleVpnJob?.isActive == true) return
         toggleVpnJob = viewModelScope.launch {
             val currentState = _state.value
-            when (currentState.vpnStatus) {
-                ServiceLauncherState.Stopped -> vpnLauncher.startService()
-                ServiceLauncherState.Running -> vpnLauncher.stopService()
-                ServiceLauncherState.Loading -> Unit
+            try {
+                when (currentState.vpnStatus) {
+                    ServiceLauncherState.Stopped -> vpnLauncher.startService()
+                    ServiceLauncherState.Running -> vpnLauncher.stopService()
+                    ServiceLauncherState.Loading -> Unit
+                }
+            } catch (e: Exception) {
+                ensureActive()
+                e.printStackTrace()
             }
         }
     }

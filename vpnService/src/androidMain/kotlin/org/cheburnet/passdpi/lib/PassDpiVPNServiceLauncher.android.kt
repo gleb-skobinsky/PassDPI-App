@@ -8,14 +8,12 @@ class PassDpiVPNServiceLauncherAndroid : PassDpiVPNServiceLauncher {
     private val _isRunning = MutableStateFlow(ServiceLauncherState.Stopped)
     override val isRunning = _isRunning.asStateFlow()
 
-    override suspend fun startService(): Boolean {
+    override suspend fun startService() {
         // TODO: Not implemented
-        return false
     }
 
-    override suspend fun stopService(): Boolean {
+    override suspend fun stopService() {
         // TODO: Not implemented
-        return false
     }
 }
 

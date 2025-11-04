@@ -24,6 +24,7 @@ kotlin {
         appleTarget.binaries.framework {
             baseName = "ComposeApp"
             isStatic = true
+            export(projects.vpnService)
         }
     }
 
@@ -34,6 +35,7 @@ kotlin {
         appleTarget.binaries.framework {
             baseName = "ComposeAppMac"
             isStatic = true
+            export(projects.vpnService)
         }
     }
 
@@ -59,7 +61,7 @@ kotlin {
             implementation(libs.koin.compose.viewmodel)
             // implementation(libs.koin.compose.navigation)
             implementation(projects.optionsStorage)
-            implementation(projects.vpnService)
+            api(projects.vpnService)
             implementation(libs.compose.multiplatform.navigation)
         }
         jvmMain.dependencies {

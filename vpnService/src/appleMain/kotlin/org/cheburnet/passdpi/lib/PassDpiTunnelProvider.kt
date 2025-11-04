@@ -38,7 +38,7 @@ private object OptionsStorageProvider : KoinComponent {
 
 @Suppress("Unused")
 @OptIn(ExperimentalForeignApi::class)
-class TunnelProvider() : NEPacketTunnelProvider() {
+class PassDpiTunnelProvider() : NEPacketTunnelProvider() {
     private val optionsStorage: PassDpiOptionsStorage = OptionsStorageProvider.getStorage()
 
     private val keyCandidates = listOf(
