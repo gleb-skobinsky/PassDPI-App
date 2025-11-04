@@ -1,11 +1,8 @@
 package org.cheburnet.passdpi.lib
 
 import kotlinx.cinterop.ExperimentalForeignApi
-import kotlinx.coroutines.runBlocking
 import org.cheburnet.passdpi.store.PassDpiOptionsStorage
 import org.cheburnet.passdpi.tunnel.TunnelAccessor
-import org.koin.core.component.KoinComponent
-import org.koin.core.component.get
 import platform.Foundation.NSDocumentDirectory
 import platform.Foundation.NSError
 import platform.Foundation.NSFileHandle
@@ -32,8 +29,8 @@ internal const val CONFIG_FILE_NAME = "config"
 internal const val CONFIG_EXT = "tmp"
 private const val CONFIG_FULL_NAME = "$CONFIG_FILE_NAME.$CONFIG_EXT"
 
-private object OptionsStorageProvider : KoinComponent {
-    fun getStorage(): PassDpiOptionsStorage = get()
+object OptionsStorageProvider {
+    fun getStorage(): PassDpiOptionsStorage = PassDpiOptionsStorage()
 }
 
 @Suppress("Unused")
@@ -51,7 +48,8 @@ class PassDpiTunnelProvider() : NEPacketTunnelProvider() {
         options: Map<Any?, *>?,
         completionHandler: (NSError?) -> Unit
     ) {
-        val options = runBlocking { optionsStorage.getVpnOptions() }
+        println("Received command to start tunnel with options: $options")
+        val options = optionsStorage.getVpnOptionsBlocking()
         val tun2socksConfig = """
         | misc:
         |   task-stack-size: 81920

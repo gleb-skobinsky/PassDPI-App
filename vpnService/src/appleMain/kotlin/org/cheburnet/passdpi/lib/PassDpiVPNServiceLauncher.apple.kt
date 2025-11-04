@@ -11,7 +11,6 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.IO
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
-import kotlinx.coroutines.runBlocking
 import kotlinx.coroutines.suspendCancellableCoroutine
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
@@ -23,9 +22,7 @@ import platform.NetworkExtension.NETunnelProviderProtocol
 import kotlin.coroutines.resume
 import kotlin.coroutines.resumeWithException
 
-class PassDpiVPNServiceLauncherMacos(
-    private val optionsStorage: PassDpiOptionsStorage,
-) : PassDpiVPNServiceLauncher {
+class PassDpiVPNServiceLauncherMacos() : PassDpiVPNServiceLauncher {
     private val _isRunning = MutableStateFlow(ServiceLauncherState.Stopped)
     override val isRunning = _isRunning.asStateFlow()
 
@@ -111,18 +108,20 @@ class PassDpiVPNServiceLauncherMacos(
 
 
     private fun createTunnelManager() = NETunnelProviderManager().apply {
-        val options = runBlocking { optionsStorage.getVpnOptions() }
+        // val options = runBlocking { optionsStorage.getVpnOptions() }
         onDemandEnabled = true
         setEnabled(true)
         val protocol = NETunnelProviderProtocol()
         protocol.providerBundleIdentifier = PROVIDER_IDENTIFIER
         protocol.serverAddress = PROVIDER_HOST
+        /*
         protocol.providerConfiguration = mapOf(
             "port" to options.port,
             "server" to PROVIDER_HOST,
             "ip" to options.dnsIp,
             "subnet" to PROVIDER_SUBNET,
         )
+         */
         protocolConfiguration = protocol
         localizedDescription = PROVIDER_NAME
     }
@@ -137,4 +136,4 @@ class PassDpiVPNServiceLauncherMacos(
 
 actual fun PassDpiVPNServiceLauncher(
     optionsStorage: PassDpiOptionsStorage,
-): PassDpiVPNServiceLauncher = PassDpiVPNServiceLauncherMacos(optionsStorage)
+): PassDpiVPNServiceLauncher = PassDpiVPNServiceLauncherMacos()

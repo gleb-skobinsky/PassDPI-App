@@ -1,6 +1,7 @@
 package org.cheburnet.passdpi.store
 
 import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.runBlocking
 
 interface PassDpiOptionsStorage {
 
@@ -17,4 +18,6 @@ interface PassDpiOptionsStorage {
     fun observeIsIpV6Enabled(): Flow<Boolean>
 
     suspend fun getVpnOptions(): PassDpiVPNOptions
+
+    fun getVpnOptionsBlocking(): PassDpiVPNOptions = runBlocking { getVpnOptions() }
 }

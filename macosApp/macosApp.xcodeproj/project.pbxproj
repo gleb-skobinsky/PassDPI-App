@@ -6,6 +6,21 @@
 	objectVersion = 77;
 	objects = {
 
+/* Begin PBXBuildFile section */
+		5A3D27FD2EBA9C150095A080 /* NetworkExtension.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 5A5056B02EB9739A00C51A55 /* NetworkExtension.framework */; };
+		5A3D28052EBA9C150095A080 /* passDpiVpn.appex in Embed System Extensions */ = {isa = PBXBuildFile; fileRef = 5A3D27FC2EBA9C140095A080 /* passDpiVpn.appex */; settings = {ATTRIBUTES = (RemoveHeadersOnCopy, ); }; };
+/* End PBXBuildFile section */
+
+/* Begin PBXContainerItemProxy section */
+		5A3D28032EBA9C150095A080 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = 5ABD75742EAED395001181F2 /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = 5A3D27FB2EBA9C140095A080;
+			remoteInfo = passDpiVpn;
+		};
+/* End PBXContainerItemProxy section */
+
 /* Begin PBXCopyFilesBuildPhase section */
 		5A5056C02EB9739B00C51A55 /* Embed System Extensions */ = {
 			isa = PBXCopyFilesBuildPhase;
@@ -13,6 +28,7 @@
 			dstPath = "";
 			dstSubfolderSpec = 13;
 			files = (
+				5A3D28052EBA9C150095A080 /* passDpiVpn.appex in Embed System Extensions */,
 			);
 			name = "Embed System Extensions";
 			runOnlyForDeploymentPostprocessing = 0;
@@ -20,13 +36,27 @@
 /* End PBXCopyFilesBuildPhase section */
 
 /* Begin PBXFileReference section */
+		5A3D27FC2EBA9C140095A080 /* passDpiVpn.appex */ = {isa = PBXFileReference; explicitFileType = "wrapper.app-extension"; includeInIndex = 0; path = passDpiVpn.appex; sourceTree = BUILT_PRODUCTS_DIR; };
 		5A5056B02EB9739A00C51A55 /* NetworkExtension.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = NetworkExtension.framework; path = System/Library/Frameworks/NetworkExtension.framework; sourceTree = SDKROOT; };
 		5ABD757C2EAED395001181F2 /* macosApp.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = macosApp.app; sourceTree = BUILT_PRODUCTS_DIR; };
 /* End PBXFileReference section */
 
+/* Begin PBXFileSystemSynchronizedBuildFileExceptionSet section */
+		5A3D28062EBA9C150095A080 /* Exceptions for "passDpiVpn" folder in "passDpiVpn" target */ = {
+			isa = PBXFileSystemSynchronizedBuildFileExceptionSet;
+			membershipExceptions = (
+				Info.plist,
+			);
+			target = 5A3D27FB2EBA9C140095A080 /* passDpiVpn */;
+		};
+/* End PBXFileSystemSynchronizedBuildFileExceptionSet section */
+
 /* Begin PBXFileSystemSynchronizedRootGroup section */
-		5A5056B22EB9739B00C51A55 /* passDpiVpn */ = {
+		5A3D27FE2EBA9C150095A080 /* passDpiVpn */ = {
 			isa = PBXFileSystemSynchronizedRootGroup;
+			exceptions = (
+				5A3D28062EBA9C150095A080 /* Exceptions for "passDpiVpn" folder in "passDpiVpn" target */,
+			);
 			path = passDpiVpn;
 			sourceTree = "<group>";
 		};
@@ -38,6 +68,14 @@
 /* End PBXFileSystemSynchronizedRootGroup section */
 
 /* Begin PBXFrameworksBuildPhase section */
+		5A3D27F92EBA9C140095A080 /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				5A3D27FD2EBA9C150095A080 /* NetworkExtension.framework in Frameworks */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 		5ABD75792EAED395001181F2 /* Frameworks */ = {
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
@@ -60,7 +98,7 @@
 			isa = PBXGroup;
 			children = (
 				5ABD757E2EAED395001181F2 /* macosApp */,
-				5A5056B22EB9739B00C51A55 /* passDpiVpn */,
+				5A3D27FE2EBA9C150095A080 /* passDpiVpn */,
 				5A5056AF2EB9739A00C51A55 /* Frameworks */,
 				5ABD757D2EAED395001181F2 /* Products */,
 			);
@@ -70,6 +108,7 @@
 			isa = PBXGroup;
 			children = (
 				5ABD757C2EAED395001181F2 /* macosApp.app */,
+				5A3D27FC2EBA9C140095A080 /* passDpiVpn.appex */,
 			);
 			name = Products;
 			sourceTree = "<group>";
@@ -77,6 +116,28 @@
 /* End PBXGroup section */
 
 /* Begin PBXNativeTarget section */
+		5A3D27FB2EBA9C140095A080 /* passDpiVpn */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = 5A3D28072EBA9C150095A080 /* Build configuration list for PBXNativeTarget "passDpiVpn" */;
+			buildPhases = (
+				5A3D27F82EBA9C140095A080 /* Sources */,
+				5A3D27F92EBA9C140095A080 /* Frameworks */,
+				5A3D27FA2EBA9C140095A080 /* Resources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+			);
+			fileSystemSynchronizedGroups = (
+				5A3D27FE2EBA9C150095A080 /* passDpiVpn */,
+			);
+			name = passDpiVpn;
+			packageProductDependencies = (
+			);
+			productName = passDpiVpn;
+			productReference = 5A3D27FC2EBA9C140095A080 /* passDpiVpn.appex */;
+			productType = "com.apple.product-type.app-extension";
+		};
 		5ABD757B2EAED395001181F2 /* macosApp */ = {
 			isa = PBXNativeTarget;
 			buildConfigurationList = 5ABD75872EAED395001181F2 /* Build configuration list for PBXNativeTarget "macosApp" */;
@@ -90,6 +151,7 @@
 			buildRules = (
 			);
 			dependencies = (
+				5A3D28042EBA9C150095A080 /* PBXTargetDependency */,
 			);
 			fileSystemSynchronizedGroups = (
 				5ABD757E2EAED395001181F2 /* macosApp */,
@@ -111,6 +173,9 @@
 				LastSwiftUpdateCheck = 2600;
 				LastUpgradeCheck = 2600;
 				TargetAttributes = {
+					5A3D27FB2EBA9C140095A080 = {
+						CreatedOnToolsVersion = 26.0;
+					};
 					5ABD757B2EAED395001181F2 = {
 						CreatedOnToolsVersion = 26.0;
 					};
@@ -131,11 +196,19 @@
 			projectRoot = "";
 			targets = (
 				5ABD757B2EAED395001181F2 /* macosApp */,
+				5A3D27FB2EBA9C140095A080 /* passDpiVpn */,
 			);
 		};
 /* End PBXProject section */
 
 /* Begin PBXResourcesBuildPhase section */
+		5A3D27FA2EBA9C140095A080 /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 		5ABD757A2EAED395001181F2 /* Resources */ = {
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
@@ -168,6 +241,13 @@
 /* End PBXShellScriptBuildPhase section */
 
 /* Begin PBXSourcesBuildPhase section */
+		5A3D27F82EBA9C140095A080 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 		5ABD75782EAED395001181F2 /* Sources */ = {
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
@@ -177,7 +257,77 @@
 		};
 /* End PBXSourcesBuildPhase section */
 
+/* Begin PBXTargetDependency section */
+		5A3D28042EBA9C150095A080 /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = 5A3D27FB2EBA9C140095A080 /* passDpiVpn */;
+			targetProxy = 5A3D28032EBA9C150095A080 /* PBXContainerItemProxy */;
+		};
+/* End PBXTargetDependency section */
+
 /* Begin XCBuildConfiguration section */
+		5A3D28082EBA9C150095A080 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				CODE_SIGN_ENTITLEMENTS = passDpiVpn/passDpiVpn.entitlements;
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_TEAM = UYH2467P62;
+				ENABLE_APP_SANDBOX = YES;
+				ENABLE_HARDENED_RUNTIME = YES;
+				ENABLE_USER_SCRIPT_SANDBOXING = YES;
+				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_FILE = passDpiVpn/Info.plist;
+				INFOPLIST_KEY_CFBundleDisplayName = passDpiVpn;
+				INFOPLIST_KEY_NSHumanReadableCopyright = "";
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/../Frameworks",
+					"@executable_path/../../../../Frameworks",
+				);
+				MARKETING_VERSION = 1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = org.cheburnet.passdpi.macosApp.passDpiVpn;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SKIP_INSTALL = YES;
+				STRING_CATALOG_GENERATE_SYMBOLS = YES;
+				SWIFT_APPROACHABLE_CONCURRENCY = YES;
+				SWIFT_EMIT_LOC_STRINGS = YES;
+				SWIFT_UPCOMING_FEATURE_MEMBER_IMPORT_VISIBILITY = YES;
+				SWIFT_VERSION = 5.0;
+			};
+			name = Debug;
+		};
+		5A3D28092EBA9C150095A080 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				CODE_SIGN_ENTITLEMENTS = passDpiVpn/passDpiVpn.entitlements;
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_TEAM = 2HXZT27KX3;
+				ENABLE_APP_SANDBOX = YES;
+				ENABLE_HARDENED_RUNTIME = YES;
+				ENABLE_USER_SCRIPT_SANDBOXING = YES;
+				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_FILE = passDpiVpn/Info.plist;
+				INFOPLIST_KEY_CFBundleDisplayName = passDpiVpn;
+				INFOPLIST_KEY_NSHumanReadableCopyright = "";
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/../Frameworks",
+					"@executable_path/../../../../Frameworks",
+				);
+				MARKETING_VERSION = 1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = org.cheburnet.passdpi.macosApp.passDpiVpn;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SKIP_INSTALL = YES;
+				STRING_CATALOG_GENERATE_SYMBOLS = YES;
+				SWIFT_APPROACHABLE_CONCURRENCY = YES;
+				SWIFT_EMIT_LOC_STRINGS = YES;
+				SWIFT_UPCOMING_FEATURE_MEMBER_IMPORT_VISIBILITY = YES;
+				SWIFT_VERSION = 5.0;
+			};
+			name = Release;
+		};
 		5ABD75852EAED395001181F2 /* Debug */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
@@ -380,6 +530,15 @@
 /* End XCBuildConfiguration section */
 
 /* Begin XCConfigurationList section */
+		5A3D28072EBA9C150095A080 /* Build configuration list for PBXNativeTarget "passDpiVpn" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				5A3D28082EBA9C150095A080 /* Debug */,
+				5A3D28092EBA9C150095A080 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
 		5ABD75772EAED395001181F2 /* Build configuration list for PBXProject "macosApp" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (

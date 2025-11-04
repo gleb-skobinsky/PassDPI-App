@@ -7,7 +7,6 @@ plugins {
     alias(libs.plugins.composeMultiplatform)
     alias(libs.plugins.composeCompiler)
     alias(libs.plugins.serialization)
-//    alias(libs.plugins.composeHotReload)
 }
 
 kotlin {
@@ -25,6 +24,7 @@ kotlin {
             baseName = "ComposeApp"
             isStatic = true
             export(projects.vpnService)
+            export(projects.tunnelInterop)
         }
     }
 
@@ -36,6 +36,7 @@ kotlin {
             baseName = "ComposeAppMac"
             isStatic = true
             export(projects.vpnService)
+            export(projects.tunnelInterop)
         }
     }
 
@@ -69,9 +70,10 @@ kotlin {
             implementation(libs.kotlinx.coroutinesSwing)
         }
         iosMain.dependencies {
+            api(projects.tunnelInterop)
         }
         macosMain.dependencies {
-
+            api(projects.tunnelInterop)
         }
     }
 }

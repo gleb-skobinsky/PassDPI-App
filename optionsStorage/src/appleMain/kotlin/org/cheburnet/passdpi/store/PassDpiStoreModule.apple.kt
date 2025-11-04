@@ -13,7 +13,10 @@ import platform.Foundation.NSURL
 import platform.Foundation.NSUserDomainMask
 
 @OptIn(ExperimentalForeignApi::class)
-actual fun Scope.getDataStore(): DataStore<Preferences> {
+actual fun Scope.getDataStore(): DataStore<Preferences> = getDataStoreApple()
+
+@OptIn(ExperimentalForeignApi::class)
+fun getDataStoreApple(): DataStore<Preferences> {
     return PreferenceDataStoreFactory.createWithPath(
         produceFile = {
             val documentDirectory: NSURL? = NSFileManager.defaultManager.URLForDirectory(
@@ -26,4 +29,8 @@ actual fun Scope.getDataStore(): DataStore<Preferences> {
             (requireNotNull(documentDirectory).path + "/$STORE_FILE_NAME").toPath()
         }
     )
+}
+
+fun PassDpiOptionsStorage(): PassDpiOptionsStorage {
+    return PassDpiOptionsStorageImpl(getDataStoreApple())
 }

@@ -158,16 +158,20 @@ class ComposeNSViewDelegate(
         }
 
         override fun keyDown(event: NSEvent) {
-            val consumed = onKeyboardEvent(event.toComposeEvent())
-            if (!consumed) {
-                // Pass only unconsumed event to system handler.
-                // It will trigger the system's "beep" sound for unconsumed events.
-                super.keyDown(event)
+            runCatching {
+                val consumed = onKeyboardEvent(event.toComposeEvent())
+                if (!consumed) {
+                    // Pass only unconsumed event to system handler.
+                    // It will trigger the system's "beep" sound for unconsumed events.
+                    super.keyDown(event)
+                }
             }
         }
 
         override fun keyUp(event: NSEvent) {
-            onKeyboardEvent(event.toComposeEvent())
+            runCatching {
+                onKeyboardEvent(event.toComposeEvent())
+            }
         }
     }
 
