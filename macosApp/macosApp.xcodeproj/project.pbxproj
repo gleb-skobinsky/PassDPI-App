@@ -60,6 +60,11 @@
 			path = passDpiVpn;
 			sourceTree = "<group>";
 		};
+		5A6272582EBA6C72005E5E44 /* test */ = {
+			isa = PBXFileSystemSynchronizedRootGroup;
+			path = test;
+			sourceTree = "<group>";
+		};
 		5ABD757E2EAED395001181F2 /* macosApp */ = {
 			isa = PBXFileSystemSynchronizedRootGroup;
 			path = macosApp;
@@ -99,6 +104,7 @@
 			children = (
 				5ABD757E2EAED395001181F2 /* macosApp */,
 				5A5056B22EB9739B00C51A55 /* passDpiVpn */,
+				5A6272582EBA6C72005E5E44 /* test */,
 				5A5056AF2EB9739A00C51A55 /* Frameworks */,
 				5ABD757D2EAED395001181F2 /* Products */,
 			);
@@ -269,7 +275,7 @@
 		5A5056BE2EB9739B00C51A55 /* Debug */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
-				CODE_SIGN_ENTITLEMENTS = passDpiVpn/passDpiVpn.entitlements;
+				CODE_SIGN_ENTITLEMENTS = passDpiVpn/passDpiVpnDebug.entitlements;
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 1;
 				DEVELOPMENT_TEAM = UYH2467P62;
