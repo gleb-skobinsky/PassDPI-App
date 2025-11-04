@@ -130,7 +130,6 @@ class PassDpiVPNServiceLauncherMacos() : PassDpiVPNServiceLauncher {
         private const val PROVIDER_IDENTIFIER = "org.cheburnet.passdpi.macosApp.passDpiVpn"
         private const val PROVIDER_HOST = "127.0.0.1"
         private const val PROVIDER_NAME = "PassDPI VPN"
-        private const val PROVIDER_SUBNET = "255.255.255.0"
     }
 }
 

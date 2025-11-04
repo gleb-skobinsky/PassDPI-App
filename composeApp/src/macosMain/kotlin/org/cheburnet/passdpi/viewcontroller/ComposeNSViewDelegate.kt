@@ -210,10 +210,12 @@ class ComposeNSViewDelegate(
         lifecycle.handleLifecycleEvent(Lifecycle.Event.ON_STOP)
     }
 
+    @Suppress("Unused")
     fun start() {
         lifecycle.handleLifecycleEvent(Lifecycle.Event.ON_START)
     }
 
+    @Suppress("Unused")
     fun pause() {
         lifecycle.handleLifecycleEvent(Lifecycle.Event.ON_PAUSE)
     }
