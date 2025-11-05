@@ -81,7 +81,7 @@ class PassDPITunnelProvider: NEPacketTunnelProvider {
                 completionHandler(NSError(domain: "PassDpiTunnelProvider", code: -2, userInfo: [NSLocalizedDescriptionKey: "Couldn't obtain fd from packets"]))
                 return
             }
-            DispatchQueue.main.async {
+            DispatchQueue.global(qos: .userInitiated).async {
                 TunnelAccessor.shared.startTunnel(configPath: configPath, fd: Int32(fd))
             }
             completionHandler(nil)
