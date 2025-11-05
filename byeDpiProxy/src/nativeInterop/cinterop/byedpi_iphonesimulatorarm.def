@@ -1,0 +1,8 @@
+headers = proxy.h
+headerFilter = proxy.h
+package = org.cheburnet.passdpi.byedpi
+compilerOpts = -Isrc/nativeInterop/cinterop/byedpi
+# linkerOpts = -Lhev-socks5-tunnel/output -lhev-socks5-tunnel
+
+staticLibraries.ios = libciadpi.a
+libraryPaths.ios = src/nativeInterop/cinterop/bin_iphonesimulator_arm64
