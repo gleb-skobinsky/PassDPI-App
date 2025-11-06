@@ -9,11 +9,14 @@ import androidx.navigation.compose.rememberNavController
 import org.cheburnet.passdpi.navigation.LocalNavigator
 import org.cheburnet.passdpi.navigation.Screens
 import org.cheburnet.passdpi.presentation.mainScreen.MainScreen
+import org.cheburnet.passdpi.presentation.settingsScreen.SettingsScreen
 
 @Composable
 fun App() {
     val navController = rememberNavController()
-    CompositionLocalProvider(LocalNavigator provides navController) {
+    CompositionLocalProvider(
+        LocalNavigator provides navController
+    ) {
         MaterialTheme {
             NavHost(
                 navController = navController,
@@ -21,6 +24,9 @@ fun App() {
             ) {
                 composable<Screens.MainScreen> {
                     MainScreen()
+                }
+                composable<Screens.SettingsScreen> {
+                    SettingsScreen()
                 }
             }
         }

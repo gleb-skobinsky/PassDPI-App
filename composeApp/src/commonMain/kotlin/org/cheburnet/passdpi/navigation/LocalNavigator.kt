@@ -4,3 +4,11 @@ import androidx.compose.runtime.staticCompositionLocalOf
 import androidx.navigation.NavHostController
 
 val LocalNavigator = staticCompositionLocalOf<NavHostController> { error("No NavHostController provided") }
+
+fun NavHostController.navigateSingleTop(
+    screen: Any,
+) {
+    navigate(screen) {
+        launchSingleTop = true
+    }
+}

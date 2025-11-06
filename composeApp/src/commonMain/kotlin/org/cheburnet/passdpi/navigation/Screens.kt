@@ -6,4 +6,7 @@ import kotlinx.serialization.Serializable
 sealed interface Screens {
     @Serializable
     data object MainScreen : Screens
+
+    @Serializable
+    data object SettingsScreen : Screens
 }

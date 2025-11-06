@@ -23,6 +23,9 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import org.cheburnet.passdpi.lib.ServiceLauncherState
+import org.cheburnet.passdpi.navigation.LocalNavigator
+import org.cheburnet.passdpi.navigation.Screens
+import org.cheburnet.passdpi.navigation.navigateSingleTop
 import org.koin.compose.viewmodel.koinViewModel
 
 
@@ -31,6 +34,7 @@ import org.koin.compose.viewmodel.koinViewModel
 internal fun MainScreen() {
     val viewModel: MainViewModel = koinViewModel()
     val state by viewModel.state.collectAsStateWithLifecycle()
+    val navigator = LocalNavigator.current
 
     Scaffold(
         containerColor = MaterialTheme.colorScheme.background,
@@ -39,7 +43,9 @@ internal fun MainScreen() {
                 title = {},
                 actions = {
                     IconButton(
-                        onClick = {}
+                        onClick = {
+                            navigator.navigateSingleTop(Screens.SettingsScreen)
+                        }
                     ) {
                         Icon(
                             imageVector = Icons.Default.Settings,
