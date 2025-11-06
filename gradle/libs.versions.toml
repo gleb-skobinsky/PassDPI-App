@@ -17,6 +17,7 @@ kotlinx-coroutines = "1.10.2"
 datastore = "1.1.7"
 koin = "4.1.1"
 navigation-kmp = "2.9.1"
+kermit = "2.0.4"
 
 [libraries]
 kotlin-test = { module = "org.jetbrains.kotlin:kotlin-test", version.ref = "kotlin" }
@@ -38,6 +39,7 @@ koin-android = { module = "io.insert-koin:koin-android", version.ref = "koin" }
 koin-compose-viewmodel = { module = "io.insert-koin:koin-compose-viewmodel", version.ref = "koin" }
 koin-compose-navigation = { module = "io.insert-koin:koin-androidx-compose-navigation", version.ref = "koin" }
 compose-multiplatform-navigation = { module = "org.jetbrains.androidx.navigation:navigation-compose", version.ref = "navigation-kmp" }
+logger = { module = "co.touchlab:kermit", version.ref = "kermit" }
 
 [plugins]
 androidApplication = { id = "com.android.application", version.ref = "agp" }

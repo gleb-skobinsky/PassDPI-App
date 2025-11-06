@@ -32,6 +32,7 @@ import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.LifecycleOwner
 import androidx.lifecycle.LifecycleRegistry
 import androidx.lifecycle.compose.LocalLifecycleOwner
+import co.touchlab.kermit.Logger
 import kotlinx.cinterop.ExperimentalForeignApi
 import kotlinx.cinterop.useContents
 import kotlinx.coroutines.Dispatchers
@@ -202,22 +203,32 @@ class ComposeNSViewDelegate(
 
     @Suppress("Unused")
     fun resume() {
+        Logger.d("Window lifecycle: RESUME")
         lifecycle.handleLifecycleEvent(Lifecycle.Event.ON_RESUME)
     }
 
     @Suppress("Unused")
     fun stop() {
+        Logger.d("Window lifecycle: STOP")
         lifecycle.handleLifecycleEvent(Lifecycle.Event.ON_STOP)
     }
 
     @Suppress("Unused")
     fun start() {
+        Logger.d("Window lifecycle: START")
         lifecycle.handleLifecycleEvent(Lifecycle.Event.ON_START)
     }
 
     @Suppress("Unused")
     fun pause() {
+        Logger.d("Window lifecycle: PAUSE")
         lifecycle.handleLifecycleEvent(Lifecycle.Event.ON_PAUSE)
+    }
+
+    @Suppress("Unused")
+    fun create() {
+        Logger.d("Window lifecycle: CREATE")
+        lifecycle.handleLifecycleEvent(Lifecycle.Event.ON_CREATE)
     }
 
     private fun onKeyboardEvent(event: KeyEvent): Boolean {
@@ -241,16 +252,17 @@ class ComposeNSViewDelegate(
     }
 
     @OptIn(ExperimentalForeignApi::class)
-    private val NSEvent.offset: DpOffset get() {
-        val position = locationInWindow.useContents {
-            DpOffset(x = x.dp, y = y.dp)
+    private val NSEvent.offset: DpOffset
+        get() {
+            val position = locationInWindow.useContents {
+                DpOffset(x = x.dp, y = y.dp)
+            }
+            val height = view.frame.useContents { size.height.dp }
+            return DpOffset(
+                x = position.x,
+                y = height - position.y,
+            )
         }
-        val height = view.frame.useContents { size.height.dp }
-        return DpOffset(
-            x = position.x,
-            y = height - position.y,
-        )
-    }
 }
 
 internal class MacosTextInputService : PlatformTextInputService {

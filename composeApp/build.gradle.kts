@@ -64,6 +64,7 @@ kotlin {
             implementation(projects.optionsStorage)
             api(projects.vpnService)
             implementation(libs.compose.multiplatform.navigation)
+            implementation(libs.logger)
         }
         jvmMain.dependencies {
             implementation(compose.desktop.currentOs)
