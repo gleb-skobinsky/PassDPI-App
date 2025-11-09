@@ -2,20 +2,33 @@ import Foundation
 import NetworkExtension
 import ComposeAppMac
 
-private let CONFIG_FILE_NAME = "config"
-private let CONFIG_EXT = "tmp"
-private let CONFIG_FULL_NAME = "\(CONFIG_FILE_NAME).\(CONFIG_EXT)"
+//private let CONFIG_FILE_NAME = "config"
+//private let CONFIG_EXT = "tmp"
+//private let CONFIG_FULL_NAME = "\(CONFIG_FILE_NAME).\(CONFIG_EXT)"
 
 class PassDPITunnelProvider: NEPacketTunnelProvider {
+    private let delegate = PassDpiTunnelProviderDelegate()
     
+    /*
     private lazy var optionsStorage: OptionsStoragePassDpiOptionsStorage = {
         OptionsStorageProvider.shared.getStorage()
     }()
+     */
     
     override func startTunnel(
         options: [String : NSObject]? = nil,
         completionHandler: @escaping (Error?) -> Void
     ) {
+        delegate.startTunnelWithOptions(
+            packetFlow: packetFlow,
+            completionHandler: completionHandler,
+            onSetNetworkSettings: { settings, completionHandler in
+                self.setTunnelNetworkSettings(settings) { error in
+                    completionHandler(error)
+                }
+            }
+        )
+        /*
         Task {
             do {
                 NSLog("Received command to start tunnel with options")
@@ -26,8 +39,26 @@ class PassDPITunnelProvider: NEPacketTunnelProvider {
                 completionHandler(error)
             }
         }
+         */
     }
     
+    override func stopTunnel(
+        with reason: NEProviderStopReason,
+        completionHandler: @escaping () -> Void
+    ) {
+        delegate.stopTunnel()
+        completionHandler()
+        /*
+        TunnelAccessor.shared.stopTunnel()
+        completionHandler()
+         */
+    }
+    
+    deinit {
+        delegate.onCleared()
+    }
+    
+    /*
     private func startTunnelInternal(
         vpnOptions: OptionsStoragePassDpiVPNOptions,
         completionHandler: @escaping (Error?) -> Void
@@ -78,15 +109,9 @@ class PassDPITunnelProvider: NEPacketTunnelProvider {
             completionHandler(nil)
         }
     }
+     */
     
-    override func stopTunnel(
-        with reason: NEProviderStopReason,
-        completionHandler: @escaping () -> Void
-    ) {
-        TunnelAccessor.shared.stopTunnel()
-        completionHandler()
-    }
-    
+    /*
     private func obtainTunFd() -> Int32? {
         var buf = [CChar](repeating: 0, count: Int(IFNAMSIZ))
         
@@ -118,4 +143,5 @@ class PassDPITunnelProvider: NEPacketTunnelProvider {
             return nil
         }
     }
+     */
 }

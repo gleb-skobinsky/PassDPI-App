@@ -28,6 +28,7 @@ kotlin {
                 implementation(libs.kotlinx.coroutines.core)
                 implementation(projects.optionsStorage)
                 implementation(libs.koin.core)
+                implementation(libs.logger)
             }
         }
         val jvmMain by getting {

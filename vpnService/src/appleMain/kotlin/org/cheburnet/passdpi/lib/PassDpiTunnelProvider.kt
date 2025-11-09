@@ -1,124 +1,153 @@
 package org.cheburnet.passdpi.lib
 
+import co.touchlab.kermit.Logger
+import kotlinx.cinterop.ByteVar
+import kotlinx.cinterop.ExperimentalForeignApi
+import kotlinx.cinterop.allocArray
+import kotlinx.cinterop.cValuesOf
+import kotlinx.cinterop.memScoped
+import kotlinx.cinterop.toKString
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.IO
+import kotlinx.coroutines.cancel
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.sync.Mutex
+import kotlinx.coroutines.sync.withLock
 import org.cheburnet.passdpi.store.PassDpiOptionsStorage
+import org.cheburnet.passdpi.tunnel.TunnelAccessor
+import platform.Foundation.NSDocumentDirectory
+import platform.Foundation.NSError
+import platform.Foundation.NSFileManager
+import platform.Foundation.NSString
+import platform.Foundation.NSURL
+import platform.Foundation.NSUTF8StringEncoding
+import platform.Foundation.NSUserDomainMask
+import platform.Foundation.dataUsingEncoding
+import platform.Foundation.valueForKey
+import platform.Foundation.writeToURL
+import platform.NetworkExtension.NEDNSSettings
+import platform.NetworkExtension.NEIPv4Route
+import platform.NetworkExtension.NEIPv4Settings
+import platform.NetworkExtension.NEIPv6Route
+import platform.NetworkExtension.NEIPv6Settings
+import platform.NetworkExtension.NEPacketTunnelFlow
+import platform.NetworkExtension.NEPacketTunnelNetworkSettings
+import platform.NetworkExtension.NETunnelNetworkSettings
+import platform.posix.IFNAMSIZ
+import platform.posix.getsockopt
 
-@Suppress("Unused")
 object OptionsStorageProvider {
     fun getStorage(): PassDpiOptionsStorage = PassDpiOptionsStorage()
 }
 
-/**
- * Legacy experimental tunnel provider built with Kotlin Native.
- * No longer used, but an interesting dinosaur.
-*
- *
- * import org.cheburnet.passdpi.tunnel.TunnelAccessor
- * import platform.Foundation.NSDocumentDirectory
- * import platform.Foundation.NSError
- * import platform.Foundation.NSFileHandle
- * import platform.Foundation.NSFileManager
- * import platform.Foundation.NSNumber
- * import platform.Foundation.NSString
- * import platform.Foundation.NSURL
- * import platform.Foundation.NSUTF8StringEncoding
- * import platform.Foundation.NSUserDomainMask
- * import platform.Foundation.dataUsingEncoding
- * import platform.Foundation.fileDescriptor
- * import platform.Foundation.valueForKeyPath
- * import platform.Foundation.writeToURL
- * import platform.NetworkExtension.NEDNSSettings
- * import platform.NetworkExtension.NEIPv4Route
- * import platform.NetworkExtension.NEIPv4Settings
- * import platform.NetworkExtension.NEIPv6Route
- * import platform.NetworkExtension.NEIPv6Settings
- * import platform.NetworkExtension.NEPacketTunnelNetworkSettings
- * import platform.NetworkExtension.NEPacketTunnelProvider
- * import platform.NetworkExtension.NEProviderStopReason
- * import kotlinx.cinterop.ExperimentalForeignApi
- *
- * internal const val CONFIG_FILE_NAME = "config"
- * internal const val CONFIG_EXT = "tmp"
- * private const val CONFIG_FULL_NAME = "$CONFIG_FILE_NAME.$CONFIG_EXT"
- *
+
+private const val CONFIG_FILE_NAME = "config"
+private const val CONFIG_EXT = "tmp"
+private const val CONFIG_FULL_NAME = "$CONFIG_FILE_NAME.$CONFIG_EXT"
+
+@Suppress("Unused") // Used in Swift!
 @OptIn(ExperimentalForeignApi::class)
-class PassDpiTunnelProvider() : NEPacketTunnelProvider() {
-    private val optionsStorage: PassDpiOptionsStorage = OptionsStorageProvider.getStorage()
+class PassDpiTunnelProviderDelegate {
+    private val optionsStorage: PassDpiOptionsStorage by lazy { OptionsStorageProvider.getStorage() }
 
-    private val keyCandidates = listOf(
-        "socket.fileDescriptor",
-        "socket",
-        "socket.handle"
-    )
+    private val coroutineScope = CoroutineScope(Dispatchers.IO.limitedParallelism(1))
+    private val mutex = Mutex()
 
-    override fun startTunnelWithOptions(
+    private val logger = Logger.withTag("PassDpiTunnelProviderDelegate")
+
+    fun startTunnelWithOptions(
+        packetFlow: NEPacketTunnelFlow,
         options: Map<Any?, *>?,
-        completionHandler: (NSError?) -> Unit
+        completionHandler: (NSError?) -> Unit,
+        onSetNetworkSettings: (NETunnelNetworkSettings?, (NSError?) -> Unit) -> Unit,
     ) {
-        println("Received command to start tunnel with options: $options")
-        val options = optionsStorage.getVpnOptionsBlocking()
-        val tun2socksConfig = """
-        | misc:
-        |   task-stack-size: 81920
-        | socks5:
-        |   mtu: 8500
-        |   address: 127.0.0.1
-        |   port: ${options.port}
-        |   udp: udp
-        """.trimMargin("| ")
-        val configPath = writeConfigToFile(tun2socksConfig)
-        val settings = NEPacketTunnelNetworkSettings(tunnelRemoteAddress = "10.10.10.10")
-        val ipV4 = NEIPv4Settings(
-            addresses = listOf("10.10.10.10"),
-            subnetMasks = listOf("255.255.255.255")
-        )
-        ipV4.includedRoutes = listOf(NEIPv4Route.defaultRoute())
-        settings.IPv4Settings = ipV4
+        coroutineScope.launch {
+            mutex.withLock {
+                logger.i("Received command to start tunnel with options: $options")
+                val options = optionsStorage.getVpnOptions()
+                val tun2socksConfig = """
+                | misc:
+                |   task-stack-size: 81920
+                | socks5:
+                |   mtu: 8500
+                |   address: 127.0.0.1
+                |   port: ${options.port}
+                |   udp: udp
+                """.trimMargin("| ")
+                val configPath = writeConfigToFile(tun2socksConfig)
+                val settings = NEPacketTunnelNetworkSettings(tunnelRemoteAddress = "10.10.10.10")
+                val ipV4 = NEIPv4Settings(
+                    addresses = listOf("10.10.10.10"),
+                    subnetMasks = listOf("255.255.255.255")
+                )
+                ipV4.includedRoutes = listOf(NEIPv4Route.defaultRoute())
+                settings.IPv4Settings = ipV4
 
-        if (options.enableIpV6) {
-            val ipV6 = NEIPv6Settings(
-                addresses = listOf("fd00::1"),
-                networkPrefixLengths = listOf(128)
-            )
-            ipV6.includedRoutes = listOf(NEIPv6Route.defaultRoute())
-        }
+                if (options.enableIpV6) {
+                    val ipV6 = NEIPv6Settings(
+                        addresses = listOf("fd00::1"),
+                        networkPrefixLengths = listOf(128)
+                    )
+                    ipV6.includedRoutes = listOf(NEIPv6Route.defaultRoute())
+                }
 
-        val dnsSettings = NEDNSSettings(servers = listOf(options.dnsIp))
-        settings.DNSSettings = dnsSettings
-        println("Settings setup complete")
+                val dnsSettings = NEDNSSettings(servers = listOf(options.dnsIp))
+                settings.DNSSettings = dnsSettings
 
 
-        setTunnelNetworkSettings(settings) { error ->
-            println("Error after settings apply: $error")
-            if (error != null) {
-                completionHandler(error)
-            }
-            val fd = obtainTunFd() ?: error("Couldn't obtain fd from packets")
-            TunnelAccessor.startTunnel(
-                configPath = configPath,
-                fd = fd
-            )
-            completionHandler(null)
-        }
-    }
-
-    private fun obtainTunFd(): Int? {
-        for (keyPath in keyCandidates) {
-            when (val rawValue = packetFlow.valueForKeyPath(keyPath)) {
-                is NSNumber -> return rawValue.intValue
-                is Int -> return rawValue
-                is NSFileHandle -> return rawValue.fileDescriptor
+                onSetNetworkSettings(settings) { error ->
+                    if (error != null) {
+                        completionHandler(error)
+                    }
+                    val fd = obtainTunFd(packetFlow) ?: error("Couldn't obtain fd from packets")
+                    launch {
+                        TunnelAccessor.startTunnel(
+                            configPath = configPath,
+                            fd = fd
+                        )
+                    }
+                    logger.i("Start tunnel complete")
+                    completionHandler(null)
+                }
             }
         }
-        return null
     }
 
-    override fun stopTunnelWithReason(
-        reason: NEProviderStopReason,
-        completionHandler: () -> Unit
-    ) {
-        TunnelAccessor.stopTunnel()
+    fun stopTunnel() {
+        coroutineScope.launch {
+            mutex.withLock {
+                TunnelAccessor.stopTunnel()
+                logger.i("Stop tunnel complete")
+            }
+        }
     }
 
+    fun onCleared() {
+        coroutineScope.cancel()
+    }
+
+    private fun obtainTunFd(packetFlow: NEPacketTunnelFlow): Int? = memScoped {
+        // Allocate a buffer for interface name
+        val buf = allocArray<ByteVar>(IFNAMSIZ)
+
+        for (fd in 0..1024) {
+            val len = IFNAMSIZ.toUInt()
+            // 2, 2 => IPPROTO_IP / IGMP option combination used to get utun name
+            val result = getsockopt(fd, 2, 2, buf, cValuesOf(len))
+
+            if (result == 0) {
+                val name = buf.toKString()
+                if (name.startsWith("utun")) {
+                    return@memScoped fd
+                }
+            }
+        }
+
+        return@memScoped packetFlow.valueForKey("socket.fileDescriptor") as? Int
+    }
+
+    @Suppress("CAST_NEVER_SUCCEEDS")
     private fun writeConfigToFile(
         tunConfig: String,
     ): String {
@@ -140,4 +169,3 @@ class PassDpiTunnelProvider() : NEPacketTunnelProvider() {
 
     private fun configFileError(): Nothing = error("Could not create config file")
 }
- */
