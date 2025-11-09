@@ -108,20 +108,11 @@ class PassDpiVPNServiceLauncherMacos() : PassDpiVPNServiceLauncher {
 
 
     private fun createTunnelManager() = NETunnelProviderManager().apply {
-        // val options = runBlocking { optionsStorage.getVpnOptions() }
         onDemandEnabled = true
         setEnabled(true)
         val protocol = NETunnelProviderProtocol()
         protocol.providerBundleIdentifier = PROVIDER_IDENTIFIER
         protocol.serverAddress = PROVIDER_HOST
-        /*
-        protocol.providerConfiguration = mapOf(
-            "port" to options.port,
-            "server" to PROVIDER_HOST,
-            "ip" to options.dnsIp,
-            "subnet" to PROVIDER_SUBNET,
-        )
-         */
         protocolConfiguration = protocol
         localizedDescription = PROVIDER_NAME
     }
