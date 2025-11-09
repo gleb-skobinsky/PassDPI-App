@@ -52,17 +52,16 @@ kotlin {
             implementation(libs.koin.android)
         }
         commonMain.dependencies {
-            implementation(compose.runtime)
-            implementation(compose.foundation)
-            implementation(compose.material3)
-            implementation(compose.components.resources)
-            implementation(compose.components.uiToolingPreview)
-            implementation(compose.materialIconsExtended)
+            implementation(libs.compose.runtime)
+            implementation(libs.compose.foundation)
+            implementation(libs.compose.material3)
+            implementation(libs.components.resources)
+            implementation(libs.ui.tooling.preview)
+            implementation(libs.material.icons.extended)
             implementation(libs.androidx.lifecycle.viewmodelCompose)
             implementation(libs.androidx.lifecycle.runtimeCompose)
             implementation(libs.koin.core)
             implementation(libs.koin.compose.viewmodel)
-            // implementation(libs.koin.compose.navigation)
             implementation(projects.optionsStorage)
             api(projects.vpnService)
             implementation(libs.compose.multiplatform.navigation)
@@ -79,12 +78,6 @@ kotlin {
         }
         macosMain.dependencies {
             api(projects.tunnelInterop)
-        }
-        macosArm64Main.dependencies {
-            implementation(libs.compose.ui.fork.arm)
-        }
-        macosX64Main.dependencies {
-            implementation(libs.compose.ui.fork.x64)
         }
     }
 }
