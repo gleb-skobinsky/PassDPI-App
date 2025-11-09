@@ -38,16 +38,12 @@ kotlin {
             export(projects.vpnService)
             export(projects.tunnelInterop)
         }
-        compilerOptions {
-            freeCompilerArgs.add("-Xklib-duplicated-unique-name-strategy=allow-first-with-warning")
-        }
     }
 
     jvm()
 
     sourceSets {
         androidMain.dependencies {
-            implementation(compose.preview)
             implementation(libs.androidx.activity.compose)
             implementation(libs.koin.android)
         }
@@ -110,7 +106,7 @@ android {
 }
 
 dependencies {
-    debugImplementation(compose.uiTooling)
+    debugImplementation(libs.ui.tooling)
 }
 
 compose.desktop {

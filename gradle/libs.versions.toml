@@ -48,6 +48,7 @@ compose-runtime = { module = "org.jetbrains.compose.runtime:runtime", version.re
 compose-material3 = { module = "org.jetbrains.compose.material3:material3", version.ref = "material3" }
 material-icons-extended = { module = "org.jetbrains.compose.material:material-icons-extended", version.ref = "materialIconsExtended" }
 ui-tooling-preview = { module = "org.jetbrains.compose.ui:ui-tooling-preview", version.ref = "composeMultiplatform" }
+ui-tooling = { module = "org.jetbrains.compose.ui:ui-tooling", version.ref = "composeMultiplatform" }
 
 [plugins]
 androidApplication = { id = "com.android.application", version.ref = "agp" }
