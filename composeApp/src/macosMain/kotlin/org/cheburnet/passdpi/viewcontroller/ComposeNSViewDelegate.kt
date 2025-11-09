@@ -1,3 +1,5 @@
+@file:Suppress("INVISIBLE_MEMBER", "INVISIBLE_REFERENCE")
+
 package org.cheburnet.passdpi.viewcontroller
 
 import androidx.compose.runtime.Composable
@@ -6,14 +8,18 @@ import androidx.compose.runtime.Stable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
+import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.InternalComposeUiApi
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.asComposeCanvas
-import androidx.compose.ui.input.key.Key
+import androidx.compose.ui.input.InputMode
+import androidx.compose.ui.input.InputModeManager
 import androidx.compose.ui.input.key.KeyEvent
-import androidx.compose.ui.input.key.KeyEventType
+import androidx.compose.ui.input.key.toComposeEvent
+import androidx.compose.ui.input.pointer.MacosCursor
 import androidx.compose.ui.input.pointer.PointerButton
 import androidx.compose.ui.input.pointer.PointerEventType
+import androidx.compose.ui.input.pointer.PointerIcon
 import androidx.compose.ui.input.pointer.PointerKeyboardModifiers
 import androidx.compose.ui.platform.PlatformContext
 import androidx.compose.ui.platform.WindowInfo
@@ -39,13 +45,8 @@ import kotlinx.coroutines.Dispatchers
 import org.jetbrains.skia.Canvas
 import org.jetbrains.skiko.SkiaLayer
 import org.jetbrains.skiko.SkikoRenderDelegate
+import platform.AppKit.NSCursor
 import platform.AppKit.NSEvent
-import platform.AppKit.NSEventModifierFlagCommand
-import platform.AppKit.NSEventModifierFlagControl
-import platform.AppKit.NSEventModifierFlagOption
-import platform.AppKit.NSEventModifierFlagShift
-import platform.AppKit.NSKeyDown
-import platform.AppKit.NSKeyUp
 import platform.AppKit.NSTrackingActiveAlways
 import platform.AppKit.NSTrackingActiveInKeyWindow
 import platform.AppKit.NSTrackingArea
@@ -68,23 +69,23 @@ class ComposeNSViewDelegate(
         isWindowFocused = true
     }
 
-    private val platformContext: PlatformContext =
-        object : PlatformContext by PlatformContext.Empty {
-            override val windowInfo get() = _windowInfo
-            override val textInputService get() = macosTextInputService
-            /*
-            override fun setPointerIcon(pointerIcon: PointerIcon) {
-                val cursor = (pointerIcon as? MacosCursor)?.cursor ?: NSCursor.arrowCursor
-                cursor.set()
-            }
+    private val platformContext: PlatformContext = object : PlatformContext {
+        override val windowInfo get() = _windowInfo
 
-             */
+        override val inputModeManager: InputModeManager = SimpleInputModeManager()
+
+        override val textInputService get() = macosTextInputService
+
+        override fun setPointerIcon(pointerIcon: PointerIcon) {
+            val cursor = (pointerIcon as? MacosCursor)?.cursor ?: NSCursor.arrowCursor
+            cursor.set()
         }
+    }
     private val skiaLayer = SkiaLayer()
     private val scene = CanvasLayersComposeScene(
         coroutineContext = Dispatchers.Main,
         platformContext = platformContext,
-        invalidate = skiaLayer::needRedraw,
+        invalidate = skiaLayer::needRender,
     )
     private val renderDelegate = object : SkikoRenderDelegate {
         override fun onRender(canvas: Canvas, width: Int, height: Int, nanoTime: Long) {
@@ -159,20 +160,16 @@ class ComposeNSViewDelegate(
         }
 
         override fun keyDown(event: NSEvent) {
-            runCatching {
-                val consumed = onKeyboardEvent(event.toComposeEvent())
-                if (!consumed) {
-                    // Pass only unconsumed event to system handler.
-                    // It will trigger the system's "beep" sound for unconsumed events.
-                    super.keyDown(event)
-                }
+            val consumed = onKeyboardEvent(event.toComposeEvent())
+            if (!consumed) {
+                // Pass only unconsumed event to system handler.
+                // It will trigger the system's "beep" sound for unconsumed events.
+                super.keyDown(event)
             }
         }
 
         override fun keyUp(event: NSEvent) {
-            runCatching {
-                onKeyboardEvent(event.toComposeEvent())
-            }
+            onKeyboardEvent(event.toComposeEvent())
         }
     }
 
@@ -305,38 +302,6 @@ internal class MacosTextInputService : PlatformTextInputService {
     }
 }
 
-internal fun NSEvent.toComposeEvent(): KeyEvent {
-    return KeyEvent(
-        nativeKeyEvent = InternalKeyEvent(
-            key = Key(keyCode.toLong()),
-            type = when (type) {
-                NSKeyDown -> KeyEventType.KeyDown
-                NSKeyUp -> KeyEventType.KeyUp
-                else -> KeyEventType.Unknown
-            },
-            codePoint = characters?.firstOrNull()?.code ?: 0, // TODO: Support multichar CodePoint
-            modifiers = toInputModifiers(),
-            nativeEvent = this
-        )
-    )
-}
-
-private fun NSEvent.toInputModifiers() = PointerKeyboardModifiers(
-    isAltPressed = modifierFlags and NSEventModifierFlagOption != 0UL,
-    isShiftPressed = modifierFlags and NSEventModifierFlagShift != 0UL,
-    isCtrlPressed = modifierFlags and NSEventModifierFlagControl != 0UL,
-    isMetaPressed = modifierFlags and NSEventModifierFlagCommand != 0UL
-)
-
-internal data class InternalKeyEvent(
-    val key: Key,
-    val type: KeyEventType,
-    val codePoint: Int,
-    val modifiers: PointerKeyboardModifiers, // Reuse pointer modifiers
-
-    val nativeEvent: Any? = null
-)
-
 @Stable
 internal fun DpOffset.toOffset(density: Density): Offset = with(density) {
     if (isSpecified) {
@@ -368,4 +333,19 @@ internal class MacosWindowInfoImpl : WindowInfo {
         // common for all windows.
         internal val GlobalKeyboardModifiers = mutableStateOf(PointerKeyboardModifiers())
     }
+}
+
+private class SimpleInputModeManager(
+    initialInputMode: InputMode = InputMode.Keyboard
+) : InputModeManager {
+    override var inputMode: InputMode by mutableStateOf(initialInputMode)
+
+    @ExperimentalComposeUiApi
+    override fun requestInputMode(inputMode: InputMode) =
+        if (inputMode == InputMode.Touch || inputMode == InputMode.Keyboard) {
+            this.inputMode = inputMode
+            true
+        } else {
+            false
+        }
 }

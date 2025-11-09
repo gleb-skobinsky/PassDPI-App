@@ -1,7 +1,6 @@
 package org.cheburnet.passdpi.store
 
 import kotlinx.coroutines.flow.Flow
-import kotlinx.coroutines.runBlocking
 
 interface PassDpiOptionsStorage {
 
@@ -19,5 +18,9 @@ interface PassDpiOptionsStorage {
 
     suspend fun getVpnOptions(): PassDpiVPNOptions
 
-    fun getVpnOptionsBlocking(): PassDpiVPNOptions = runBlocking { getVpnOptions() }
+    suspend fun saveEditableSettings(
+        settings: EditableSettings,
+    )
+
+    fun observeEditableSettings(): Flow<EditableSettings>
 }

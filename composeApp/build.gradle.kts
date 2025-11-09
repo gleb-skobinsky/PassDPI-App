@@ -38,6 +38,9 @@ kotlin {
             export(projects.vpnService)
             export(projects.tunnelInterop)
         }
+        compilerOptions {
+            freeCompilerArgs.add("-Xklib-duplicated-unique-name-strategy=allow-first-with-warning")
+        }
     }
 
     jvm()
@@ -52,7 +55,6 @@ kotlin {
             implementation(compose.runtime)
             implementation(compose.foundation)
             implementation(compose.material3)
-            implementation(compose.ui)
             implementation(compose.components.resources)
             implementation(compose.components.uiToolingPreview)
             implementation(compose.materialIconsExtended)
@@ -65,16 +67,24 @@ kotlin {
             api(projects.vpnService)
             implementation(libs.compose.multiplatform.navigation)
             implementation(libs.logger)
+            implementation(libs.compose.ui)
         }
         jvmMain.dependencies {
             implementation(compose.desktop.currentOs)
             implementation(libs.kotlinx.coroutinesSwing)
+
         }
         iosMain.dependencies {
             api(projects.tunnelInterop)
         }
         macosMain.dependencies {
             api(projects.tunnelInterop)
+        }
+        macosArm64Main.dependencies {
+            implementation(libs.compose.ui.fork.arm)
+        }
+        macosX64Main.dependencies {
+            implementation(libs.compose.ui.fork.x64)
         }
     }
 }

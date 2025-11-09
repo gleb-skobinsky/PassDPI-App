@@ -2,6 +2,7 @@ package org.cheburnet.passdpi.di
 
 import org.cheburnet.passdpi.lib.ServiceLauncherModule
 import org.cheburnet.passdpi.presentation.mainScreen.MainViewModel
+import org.cheburnet.passdpi.presentation.settingsScreen.SettingsViewModel
 import org.cheburnet.passdpi.store.PassDpiStoreModule
 import org.koin.core.KoinApplication
 import org.koin.core.context.startKoin
@@ -33,4 +34,5 @@ fun KoinApplication.declareCommonModules() {
 
 private val PresentationModule = module {
     viewModel { MainViewModel(get()) }
+    viewModel { SettingsViewModel(get()) }
 }

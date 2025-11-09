@@ -1,39 +1,45 @@
 package org.cheburnet.passdpi.lib
 
-import kotlinx.cinterop.ExperimentalForeignApi
 import org.cheburnet.passdpi.store.PassDpiOptionsStorage
-import org.cheburnet.passdpi.tunnel.TunnelAccessor
-import platform.Foundation.NSDocumentDirectory
-import platform.Foundation.NSError
-import platform.Foundation.NSFileHandle
-import platform.Foundation.NSFileManager
-import platform.Foundation.NSNumber
-import platform.Foundation.NSString
-import platform.Foundation.NSURL
-import platform.Foundation.NSUTF8StringEncoding
-import platform.Foundation.NSUserDomainMask
-import platform.Foundation.dataUsingEncoding
-import platform.Foundation.fileDescriptor
-import platform.Foundation.valueForKeyPath
-import platform.Foundation.writeToURL
-import platform.NetworkExtension.NEDNSSettings
-import platform.NetworkExtension.NEIPv4Route
-import platform.NetworkExtension.NEIPv4Settings
-import platform.NetworkExtension.NEIPv6Route
-import platform.NetworkExtension.NEIPv6Settings
-import platform.NetworkExtension.NEPacketTunnelNetworkSettings
-import platform.NetworkExtension.NEPacketTunnelProvider
-import platform.NetworkExtension.NEProviderStopReason
 
-internal const val CONFIG_FILE_NAME = "config"
-internal const val CONFIG_EXT = "tmp"
-private const val CONFIG_FULL_NAME = "$CONFIG_FILE_NAME.$CONFIG_EXT"
-
+@Suppress("Unused")
 object OptionsStorageProvider {
     fun getStorage(): PassDpiOptionsStorage = PassDpiOptionsStorage()
 }
 
-@Suppress("Unused")
+/**
+ * Legacy experimental tunnel provider built with Kotlin Native.
+ * No longer used, but an interesting dinosaur.
+*
+ *
+ * import org.cheburnet.passdpi.tunnel.TunnelAccessor
+ * import platform.Foundation.NSDocumentDirectory
+ * import platform.Foundation.NSError
+ * import platform.Foundation.NSFileHandle
+ * import platform.Foundation.NSFileManager
+ * import platform.Foundation.NSNumber
+ * import platform.Foundation.NSString
+ * import platform.Foundation.NSURL
+ * import platform.Foundation.NSUTF8StringEncoding
+ * import platform.Foundation.NSUserDomainMask
+ * import platform.Foundation.dataUsingEncoding
+ * import platform.Foundation.fileDescriptor
+ * import platform.Foundation.valueForKeyPath
+ * import platform.Foundation.writeToURL
+ * import platform.NetworkExtension.NEDNSSettings
+ * import platform.NetworkExtension.NEIPv4Route
+ * import platform.NetworkExtension.NEIPv4Settings
+ * import platform.NetworkExtension.NEIPv6Route
+ * import platform.NetworkExtension.NEIPv6Settings
+ * import platform.NetworkExtension.NEPacketTunnelNetworkSettings
+ * import platform.NetworkExtension.NEPacketTunnelProvider
+ * import platform.NetworkExtension.NEProviderStopReason
+ * import kotlinx.cinterop.ExperimentalForeignApi
+ *
+ * internal const val CONFIG_FILE_NAME = "config"
+ * internal const val CONFIG_EXT = "tmp"
+ * private const val CONFIG_FULL_NAME = "$CONFIG_FILE_NAME.$CONFIG_EXT"
+ *
 @OptIn(ExperimentalForeignApi::class)
 class PassDpiTunnelProvider() : NEPacketTunnelProvider() {
     private val optionsStorage: PassDpiOptionsStorage = OptionsStorageProvider.getStorage()
@@ -134,3 +140,4 @@ class PassDpiTunnelProvider() : NEPacketTunnelProvider() {
 
     private fun configFileError(): Nothing = error("Could not create config file")
 }
+ */

@@ -18,6 +18,8 @@ internal class PassDpiOptionsStorageImpl(
     private val optsDnsIpKey = stringPreferencesKey(OPTS_DNS_IP_KEY)
     private val ipv6EnabledKey = booleanPreferencesKey(OPTS_IPV6_ENABLED_KEY)
 
+    private val commandLineArgsKey = stringPreferencesKey(COMMAND_LINE_ARGS_KEY)
+
     override fun observePort(): Flow<Int> {
         return dataStore.data.map { it.getPort() }.distinctUntilChanged()
     }
@@ -51,6 +53,20 @@ internal class PassDpiOptionsStorageImpl(
         )
     }
 
+    override suspend fun saveEditableSettings(settings: EditableSettings) {
+        dataStore.edit {
+            it[commandLineArgsKey] = settings.commandLineArgs
+        }
+    }
+
+    override fun observeEditableSettings(): Flow<EditableSettings> {
+        return dataStore.data.map {
+            EditableSettings(
+                commandLineArgs = it.commandLineArgs(),
+            )
+        }.distinctUntilChanged()
+    }
+
     private fun Preferences?.getPort(): Int {
         return this?.get(optsPortKey) ?: DEFAULT_PORT
     }
@@ -63,10 +79,16 @@ internal class PassDpiOptionsStorageImpl(
         return this?.get(ipv6EnabledKey) ?: false
     }
 
+    private fun Preferences?.commandLineArgs(): String {
+        return this?.get(commandLineArgsKey).orEmpty()
+    }
+
     companion object {
         private const val OPTS_PORT_KEY = "OPTS_PORT"
         private const val OPTS_DNS_IP_KEY = "OPTS_DNS_IP"
         private const val OPTS_IPV6_ENABLED_KEY = "OPTS_IPV6_ENABLED"
+
+        private const val COMMAND_LINE_ARGS_KEY = "COMMAND_LINE_ARGS"
         internal const val STORE_FILE_NAME = "passdpi.preferences_pb"
     }
 }

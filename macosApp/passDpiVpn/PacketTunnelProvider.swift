@@ -8,18 +8,9 @@ private let CONFIG_FULL_NAME = "\(CONFIG_FILE_NAME).\(CONFIG_EXT)"
 
 class PassDPITunnelProvider: NEPacketTunnelProvider {
     
-    private var optionsStorage: OptionsStoragePassDpiOptionsStorage? = nil
-    
-    // Lazily create the storage
-    private func getOrCreateStorage() -> OptionsStoragePassDpiOptionsStorage {
-        if let existing = optionsStorage {
-            return existing
-        } else {
-            let new = OptionsStorageProvider.shared.getStorage()
-            optionsStorage = new
-            return new
-        }
-    }
+    private lazy var optionsStorage: OptionsStoragePassDpiOptionsStorage = {
+        OptionsStorageProvider.shared.getStorage()
+    }()
     
     override func startTunnel(
         options: [String : NSObject]? = nil,
@@ -28,7 +19,7 @@ class PassDPITunnelProvider: NEPacketTunnelProvider {
         Task {
             do {
                 NSLog("Received command to start tunnel with options")
-                let vpnOptions = try await getOrCreateStorage().getVpnOptions()
+                let vpnOptions = try await optionsStorage.getVpnOptions()
                 self.startTunnelInternal(vpnOptions: vpnOptions, completionHandler: completionHandler)
             } catch {
                 NSLog("Error occurred while retrieving options: \(error)")
