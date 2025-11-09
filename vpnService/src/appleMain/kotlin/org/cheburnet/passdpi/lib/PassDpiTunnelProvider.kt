@@ -37,6 +37,7 @@ import platform.NetworkExtension.NETunnelNetworkSettings
 import platform.posix.IFNAMSIZ
 import platform.posix.getsockopt
 
+@Suppress("Unused") // may be used in Swift!
 object OptionsStorageProvider {
     fun getStorage(): PassDpiOptionsStorage = PassDpiOptionsStorage()
 }
@@ -49,7 +50,7 @@ private const val CONFIG_FULL_NAME = "$CONFIG_FILE_NAME.$CONFIG_EXT"
 @Suppress("Unused") // Used in Swift!
 @OptIn(ExperimentalForeignApi::class)
 class PassDpiTunnelProviderDelegate {
-    private val optionsStorage: PassDpiOptionsStorage by lazy { OptionsStorageProvider.getStorage() }
+    private val optionsStorage: PassDpiOptionsStorage by lazy { PassDpiOptionsStorage() }
 
     private val coroutineScope = CoroutineScope(Dispatchers.IO.limitedParallelism(1))
     private val mutex = Mutex()
