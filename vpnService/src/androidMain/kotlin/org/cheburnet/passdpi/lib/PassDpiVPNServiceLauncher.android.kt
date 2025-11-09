@@ -6,7 +6,7 @@ import org.cheburnet.passdpi.store.PassDpiOptionsStorage
 
 class PassDpiVPNServiceLauncherAndroid : PassDpiVPNServiceLauncher {
     private val _isRunning = MutableStateFlow(ServiceLauncherState.Stopped)
-    override val isRunning = _isRunning.asStateFlow()
+    override val connectionState = _isRunning.asStateFlow()
 
     override suspend fun startService() {
         // TODO: Not implemented

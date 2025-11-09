@@ -191,6 +191,7 @@ class ComposeNSViewDelegate(
 
     @Suppress("Unused")
     fun destroy() {
+        Logger.d("Window lifecycle: DESTROY")
         check(!isDisposed) { "ComposeWindow is already disposed" }
         lifecycle.handleLifecycleEvent(Lifecycle.Event.ON_DESTROY)
         skiaLayer.detach()

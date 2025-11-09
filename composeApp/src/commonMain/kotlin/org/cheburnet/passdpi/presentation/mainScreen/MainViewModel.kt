@@ -43,7 +43,7 @@ class MainViewModel(
     }
 
     private fun observeVpnStatus() {
-        vpnLauncher.isRunning.onEach { status ->
+        vpnLauncher.connectionState.onEach { status ->
             _state.update { it.copy(vpnStatus = status) }
         }.launchIn(viewModelScope)
     }

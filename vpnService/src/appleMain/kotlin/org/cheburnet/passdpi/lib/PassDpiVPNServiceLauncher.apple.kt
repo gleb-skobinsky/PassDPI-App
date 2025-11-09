@@ -8,9 +8,16 @@ import kotlinx.cinterop.memScoped
 import kotlinx.cinterop.ptr
 import kotlinx.cinterop.value
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.IO
+import kotlinx.coroutines.channels.awaitClose
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.callbackFlow
+import kotlinx.coroutines.flow.merge
+import kotlinx.coroutines.isActive
+import kotlinx.coroutines.launch
 import kotlinx.coroutines.suspendCancellableCoroutine
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
@@ -19,23 +26,33 @@ import org.cheburnet.passdpi.store.PassDpiOptionsStorage
 import platform.Foundation.NSError
 import platform.NetworkExtension.NETunnelProviderManager
 import platform.NetworkExtension.NETunnelProviderProtocol
+import platform.NetworkExtension.NEVPNStatusConnected
+import platform.NetworkExtension.NEVPNStatusDisconnected
 import kotlin.coroutines.resume
 import kotlin.coroutines.resumeWithException
+import kotlin.time.Duration.Companion.seconds
 
 class PassDpiVPNServiceLauncherMacos() : PassDpiVPNServiceLauncher {
-    private val _isRunning = MutableStateFlow(ServiceLauncherState.Stopped)
-    override val isRunning = _isRunning.asStateFlow()
 
     private val mutex = Mutex()
     private val singleThreadedDispatcher = Dispatchers.IO.limitedParallelism(1)
+    private val statusFromInteraction = MutableStateFlow(ServiceLauncherState.Stopped)
+
+    override val connectionState = merge(
+        statusFromInteraction,
+        observeConnectionStatus()
+    )
+
+    private var currentTunnelManager: NETunnelProviderManager? = null
 
 
     @OptIn(ExperimentalForeignApi::class, BetaInteropApi::class)
     override suspend fun startService() {
         return withContext(singleThreadedDispatcher) {
             mutex.withLock(owner = this) {
-                _isRunning.value = ServiceLauncherState.Loading
+                statusFromInteraction.value = ServiceLauncherState.Loading
                 val tunnelManager = loadOrCreateManager()
+                currentTunnelManager = tunnelManager
                 suspendCancellableCoroutine { continuation ->
                     tunnelManager.loadFromPreferencesWithCompletionHandler { error ->
                         error?.let {
@@ -67,8 +84,32 @@ class PassDpiVPNServiceLauncherMacos() : PassDpiVPNServiceLauncher {
                         }
                     }
                 }
-                _isRunning.value = ServiceLauncherState.Running
+                statusFromInteraction.value = ServiceLauncherState.Running
             }
+        }
+    }
+
+    @OptIn(ExperimentalCoroutinesApi::class)
+    private fun observeConnectionStatus(): Flow<ServiceLauncherState> = callbackFlow {
+        val listenerJob = launch {
+            while (isActive) {
+                val manager = currentTunnelManager
+                send(manager?.connection?.status.toState())
+                delay(1.seconds)
+            }
+        }
+        awaitClose {
+            listenerJob.cancel()
+        }
+    }
+
+
+    private fun Long?.toState(): ServiceLauncherState {
+        return when (this) {
+            null -> ServiceLauncherState.Stopped
+            NEVPNStatusConnected -> ServiceLauncherState.Running
+            NEVPNStatusDisconnected -> ServiceLauncherState.Stopped
+            else -> ServiceLauncherState.Loading
         }
     }
 
@@ -77,7 +118,7 @@ class PassDpiVPNServiceLauncherMacos() : PassDpiVPNServiceLauncher {
     override suspend fun stopService() {
         return mutex.withLock(owner = this) {
             loadOrCreateManager().connection.stopVPNTunnel()
-            _isRunning.value = ServiceLauncherState.Stopped
+            statusFromInteraction.value = ServiceLauncherState.Stopped
         }
     }
 

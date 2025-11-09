@@ -44,9 +44,6 @@ class AppDelegate: NSObject, NSApplicationDelegate {
     
     func applicationWillFinishLaunching(_ notification: Notification) {
         composeDelegate?.create()
-    }
-    
-    func applicationWillBecomeActive(_ notification: Notification) {
         composeDelegate?.start()
     }
     
@@ -54,15 +51,12 @@ class AppDelegate: NSObject, NSApplicationDelegate {
         composeDelegate?.resume()
     }
     
-    func applicationWillResignActive(_ notification: Notification) {
+    func applicationDidResignActive(_ notification: Notification) {
         composeDelegate?.pause()
     }
     
-    func applicationDidResignActive(_ notification: Notification) {
-        composeDelegate?.stop()
-    }
-    
     func applicationWillTerminate(_ notification: Notification) {
+        composeDelegate?.stop()
         composeDelegate?.destroy()
     }
 }
