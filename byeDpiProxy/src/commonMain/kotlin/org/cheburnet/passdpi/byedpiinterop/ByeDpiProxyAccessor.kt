@@ -1,7 +1,7 @@
 package org.cheburnet.passdpi.byedpiinterop
 
 expect object ByeDpiProxyAccessor {
-    fun startProxy(fd: Int)
+    fun startProxy(args: Array<String>): Int
 
-    fun stopProxy()
+    fun stopProxy(fd: Int): Int
 }
