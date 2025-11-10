@@ -13,7 +13,8 @@ headers = conev.h \
 headerFilter = **
 package = org.cheburnet.passdpi.byedpi
 compilerOpts = -Isrc/nativeInterop/cinterop/byedpi
-# linkerOpts = -Lhev-socks5-tunnel/output -lhev-socks5-tunnel
+
+linkerOpts = -Wl,-force_load,src/nativeInterop/cinterop/bin_macosx_arm64/libciadpi.a
 
 staticLibraries.osx = libciadpi.a
 libraryPaths.osx = src/nativeInterop/cinterop/bin_macosx_arm64
