@@ -51,6 +51,7 @@ private const val CONFIG_FULL_NAME = "$CONFIG_FILE_NAME.$CONFIG_EXT"
 @OptIn(ExperimentalForeignApi::class)
 class PassDpiTunnelProviderDelegate {
     private val optionsStorage: PassDpiOptionsStorage by lazy { PassDpiOptionsStorage() }
+    private val byeDpiProxy: ByeDpiProxyManager by lazy { ByeDpiProxyManager() }
 
     private val coroutineScope = CoroutineScope(Dispatchers.IO.limitedParallelism(1))
     private val mutex = Mutex()
@@ -96,16 +97,22 @@ class PassDpiTunnelProviderDelegate {
                 val dnsSettings = NEDNSSettings(servers = listOf(options.dnsIp))
                 settings.DNSSettings = dnsSettings
 
-
+                val commandLineArgs = optionsStorage.getCommandLineArgs()
                 onSetNetworkSettings(settings) { error ->
                     if (error != null) {
                         completionHandler(error)
                     }
                     val fd = obtainTunFd(packetFlow) ?: error("Couldn't obtain fd from packets")
+
                     launch {
                         TunnelAccessor.startTunnel(
                             configPath = configPath,
                             fd = fd
+                        )
+                    }
+                    launch {
+                        byeDpiProxy.startProxy(
+                            cmdToArgs(commandLineArgs)
                         )
                     }
                     logger.i("Start tunnel complete")

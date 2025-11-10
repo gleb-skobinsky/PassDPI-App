@@ -49,6 +49,7 @@ kotlin {
             dependsOn(commonMain)
             dependencies {
                 implementation(projects.tunnelInterop)
+                implementation(projects.byeDpiProxy)
             }
         }
 

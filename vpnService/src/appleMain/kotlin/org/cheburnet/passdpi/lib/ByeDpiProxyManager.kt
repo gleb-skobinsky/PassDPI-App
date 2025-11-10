@@ -2,6 +2,7 @@ package org.cheburnet.passdpi.lib
 
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
+import org.cheburnet.passdpi.byedpiinterop.ByeDpiProxyAccessor
 
 class ByeDpiProxyManager {
     private val mutex = Mutex()
@@ -12,7 +13,7 @@ class ByeDpiProxyManager {
         if (fd < 0) {
             return -1
         }
-        return jniStartProxy(fd)
+        return ByeDpiProxyAccessor.startProxy(fd)
     }
 
     private suspend fun createSocket(commandLineArguments: Array<String>): Int {
@@ -21,7 +22,7 @@ class ByeDpiProxyManager {
                 throw IllegalStateException("Proxy is already running")
             }
 
-            val fd = createSocketFromPreferences(preferences)
+            val fd = ByeDpiProxyAccessor.createSocket(commandLineArguments)
             if (fd < 0) {
                 return -1
             }
@@ -29,6 +30,4 @@ class ByeDpiProxyManager {
             fd
         }
     }
-
-
 }

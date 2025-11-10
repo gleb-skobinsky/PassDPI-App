@@ -23,4 +23,6 @@ interface PassDpiOptionsStorage {
     )
 
     fun observeEditableSettings(): Flow<EditableSettings>
+
+    suspend fun getCommandLineArgs(): String
 }

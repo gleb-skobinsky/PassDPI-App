@@ -67,6 +67,10 @@ internal class PassDpiOptionsStorageImpl(
         }.distinctUntilChanged()
     }
 
+    override suspend fun getCommandLineArgs(): String {
+        return dataStore.data.firstOrNull().commandLineArgs()
+    }
+
     private fun Preferences?.getPort(): Int {
         return this?.get(optsPortKey) ?: DEFAULT_PORT
     }
