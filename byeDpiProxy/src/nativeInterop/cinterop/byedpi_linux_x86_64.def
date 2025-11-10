@@ -1,5 +1,14 @@
-headers = proxy.h
-headerFilter = proxy.h
+headers = conev.h \
+            desync.h \
+            error.h \
+            extend.h \
+            kavl.h \
+            mpool.h \
+            packets.h \
+            params.h \
+            proxy.h \
+            win_service.h
+headerFilter = **
 package = org.cheburnet.passdpi.byedpi
 compilerOpts = -Isrc/nativeInterop/cinterop/byedpi
 # linkerOpts = -Lhev-socks5-tunnel/output -lhev-socks5-tunnel
