@@ -53,7 +53,8 @@ class PassDpiTunnelProviderDelegate {
     private val optionsStorage: PassDpiOptionsStorage by lazy { PassDpiOptionsStorage() }
     private val byeDpiProxy: ByeDpiProxyManager by lazy { ByeDpiProxyManager() }
 
-    private val coroutineScope = CoroutineScope(Dispatchers.IO.limitedParallelism(1))
+    // One thread for tunnel, one for proxy, one not to starve
+    private val coroutineScope = CoroutineScope(Dispatchers.IO.limitedParallelism(3))
     private val mutex = Mutex()
 
     private val logger = Logger.withTag("PassDpiTunnelProviderDelegate")
