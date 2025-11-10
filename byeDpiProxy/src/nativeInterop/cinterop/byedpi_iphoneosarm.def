@@ -7,7 +7,9 @@ headers = conev.h \
             packets.h \
             params.h \
             proxy.h \
-            win_service.h
+            win_service.h \
+            main.h \
+            utils.h
 headerFilter = **
 package = org.cheburnet.passdpi.byedpi
 compilerOpts = -Isrc/nativeInterop/cinterop/byedpi

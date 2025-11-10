@@ -1,6 +1,7 @@
 package org.cheburnet.passdpi.byedpiinterop
 
 import kotlinx.cinterop.ExperimentalForeignApi
+import org.cheburnet.passdpi.byedpi.parse_args
 import org.cheburnet.passdpi.byedpi.start_event_loop
 
 @OptIn(ExperimentalForeignApi::class)
