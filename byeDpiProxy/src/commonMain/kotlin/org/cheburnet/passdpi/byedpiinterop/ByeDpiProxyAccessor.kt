@@ -20,7 +20,6 @@ object ByeDpiProxyAccessor {
         val argc = args.size
         val nativeArgs = args.toPersistentCStringArray()
         return try {
-            dumpArgv(nativeArgs, argc)
             val res = parseArgs(
                 argc = argc,
                 argv = nativeArgs
