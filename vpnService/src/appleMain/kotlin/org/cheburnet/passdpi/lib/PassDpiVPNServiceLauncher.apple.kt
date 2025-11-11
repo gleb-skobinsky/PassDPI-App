@@ -39,7 +39,7 @@ internal const val OPTIONS_DNS_IP = "OPTIONS_DNS_IP_KEY"
 
 internal const val OPTIONS_ENABLE_IPV6 = "OPTIONS_ENABLE_IPV6_KEY"
 
-class PassDpiVPNServiceLauncherMacos(
+class PassDpiVPNServiceLauncherApple(
     private val optionsStorage: PassDpiOptionsStorage,
 ) : PassDpiVPNServiceLauncher {
 
@@ -186,4 +186,4 @@ class PassDpiVPNServiceLauncherMacos(
 
 actual fun PassDpiVPNServiceLauncher(
     optionsStorage: PassDpiOptionsStorage,
-): PassDpiVPNServiceLauncher = PassDpiVPNServiceLauncherMacos(optionsStorage)
+): PassDpiVPNServiceLauncher = PassDpiVPNServiceLauncherApple(optionsStorage)
