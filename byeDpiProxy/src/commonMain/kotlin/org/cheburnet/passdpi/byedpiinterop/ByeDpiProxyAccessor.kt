@@ -1,5 +1,6 @@
 package org.cheburnet.passdpi.byedpiinterop
 
+import kotlinx.cinterop.AutofreeScope
 import kotlinx.cinterop.ByteVar
 import kotlinx.cinterop.ByteVarOf
 import kotlinx.cinterop.CPointer
@@ -9,16 +10,23 @@ import kotlinx.cinterop.CValuesRef
 import kotlinx.cinterop.ExperimentalForeignApi
 import kotlinx.cinterop.MemScope
 import kotlinx.cinterop.allocArray
+import kotlinx.cinterop.allocArrayOf
 import kotlinx.cinterop.cstr
 import kotlinx.cinterop.memScoped
+import kotlinx.cinterop.nativeHeap
 import kotlinx.cinterop.set
+import platform.posix.strdup
 
 @OptIn(ExperimentalForeignApi::class)
 object ByeDpiProxyAccessor {
     fun createSocket(args: Array<String>): Int {
         return memScoped {
             val argc = args.size
-            val res = parseArgs(argc = argc, argv = args.toCStringArray(this))
+
+            val res = parseArgs(
+                argc = argc,
+                argv = args.toCArray(this)
+            )
             if (res < 0) {
                 return@memScoped -1
             }
@@ -48,16 +56,31 @@ object ByeDpiProxyAccessor {
     }
 
 
-
-    private fun Array<String>.toCStringArray(memScope: MemScope): CValuesRef<CPointerVar<ByteVar>> {
+    private fun Array<String>.toCStringArray(
+        memScope: MemScope,
+    ): CPointer<CPointerVar<ByteVar>> {
         val argc = this.size
         val argv = memScope.allocArray<CPointerVar<ByteVar>>(argc)
 
         for (i in indices) {
-            val cstr = this[i].cstr.getPointer(memScope)
-            argv[i] = cstr
+            //argv[i] = this[i].cstr.getPointer(memScope)
+            argv[i] = strdup(this[i])
         }
+        argv[argc] = null
+        return argv
+    }
 
+    fun Array<String>.toCArray(autofreeScope: AutofreeScope): CPointer<CPointerVar<ByteVar>> =
+        autofreeScope.allocArrayOf(this.map { it.cstr.getPointer(autofreeScope) })
+
+
+    fun Array<String>.toPersistentCStringArray(): CPointer<CPointerVar<ByteVar>> {
+        val argc = size
+        val argv = nativeHeap.allocArray<CPointerVar<ByteVar>>(argc + 1)
+        for (i in indices) {
+            argv[i] = strdup(this[i])
+        }
+        argv[argc] = null
         return argv
     }
 }

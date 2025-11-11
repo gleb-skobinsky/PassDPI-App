@@ -6,8 +6,16 @@ import ComposeAppMac
 //private let CONFIG_EXT = "tmp"
 //private let CONFIG_FULL_NAME = "\(CONFIG_FILE_NAME).\(CONFIG_EXT)"
 
+private class PassDpiLoggerImpl: PassDpiLogger {
+    init() {}
+    
+    func log(message: String) {
+        NSLog("PassDPITunnelProvider: \(message)")
+    }
+}
+
 class PassDPITunnelProvider: NEPacketTunnelProvider {
-    private let delegate = PassDpiTunnelProviderDelegate()
+    private let delegate = PassDpiTunnelProviderDelegate(logger: PassDpiLoggerImpl())
     
     /*
     private lazy var optionsStorage: OptionsStoragePassDpiOptionsStorage = {
@@ -19,8 +27,9 @@ class PassDPITunnelProvider: NEPacketTunnelProvider {
         options: [String : NSObject]? = nil,
         completionHandler: @escaping (Error?) -> Void
     ) {
-        delegate.startTunnelWithOptions(
+        delegate.startPassDpiTunnel(
             packetFlow: packetFlow,
+            options: options,
             completionHandler: completionHandler,
             onSetNetworkSettings: { settings, completionHandler in
                 self.setTunnelNetworkSettings(settings) { error in

@@ -32,7 +32,16 @@ import kotlin.coroutines.resume
 import kotlin.coroutines.resumeWithException
 import kotlin.time.Duration.Companion.seconds
 
-class PassDpiVPNServiceLauncherMacos() : PassDpiVPNServiceLauncher {
+internal const val OPTIONS_CMD_LINE_ARGS = "OPTIONS_CMD_LINE_ARGS_KEY"
+
+internal const val OPTIONS_PORT_KEY = "VPN_OPTIONS_PORT_KEY"
+internal const val OPTIONS_DNS_IP = "OPTIONS_DNS_IP_KEY"
+
+internal const val OPTIONS_ENABLE_IPV6 = "OPTIONS_ENABLE_IPV6_KEY"
+
+class PassDpiVPNServiceLauncherMacos(
+    private val optionsStorage: PassDpiOptionsStorage,
+) : PassDpiVPNServiceLauncher {
 
     private val mutex = Mutex()
     private val singleThreadedDispatcher = Dispatchers.IO.limitedParallelism(1)
@@ -53,6 +62,8 @@ class PassDpiVPNServiceLauncherMacos() : PassDpiVPNServiceLauncher {
                 statusFromInteraction.value = ServiceLauncherState.Loading
                 val tunnelManager = loadOrCreateManager()
                 currentTunnelManager = tunnelManager
+                val commandLineArgs = optionsStorage.getCommandLineArgs()
+                val options = optionsStorage.getVpnOptions()
                 suspendCancellableCoroutine { continuation ->
                     tunnelManager.loadFromPreferencesWithCompletionHandler { error ->
                         error?.let {
@@ -67,7 +78,15 @@ class PassDpiVPNServiceLauncherMacos() : PassDpiVPNServiceLauncher {
                                     val errorPtr: ObjCObjectVar<NSError?> =
                                         alloc<ObjCObjectVar<NSError?>>()
                                     val isSuccess = tunnelManager.connection
-                                        .startVPNTunnelAndReturnError(errorPtr.ptr)
+                                        .startVPNTunnelWithOptions(
+                                            options = mapOf(
+                                                OPTIONS_CMD_LINE_ARGS to commandLineArgs,
+                                                OPTIONS_PORT_KEY to options.port,
+                                                OPTIONS_DNS_IP to options.dnsIp,
+                                                OPTIONS_ENABLE_IPV6 to options.enableIpV6.toString()
+                                            ),
+                                            andReturnError = errorPtr.ptr
+                                        )
                                     val error = errorPtr.value
                                     when {
                                         !isSuccess -> continuation.resumeWithException(
@@ -167,4 +186,4 @@ class PassDpiVPNServiceLauncherMacos() : PassDpiVPNServiceLauncher {
 
 actual fun PassDpiVPNServiceLauncher(
     optionsStorage: PassDpiOptionsStorage,
-): PassDpiVPNServiceLauncher = PassDpiVPNServiceLauncherMacos()
+): PassDpiVPNServiceLauncher = PassDpiVPNServiceLauncherMacos(optionsStorage)

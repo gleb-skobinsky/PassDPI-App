@@ -7,7 +7,6 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Settings
 import androidx.compose.material3.Button
-import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
@@ -19,7 +18,6 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import org.cheburnet.passdpi.lib.ServiceLauncherState
@@ -68,17 +66,14 @@ internal fun MainScreen() {
                     viewModel.toggleVpn()
                 }
             ) {
-                when (state.vpnStatus) {
-                    ServiceLauncherState.Loading -> {
-                        CircularProgressIndicator(
-                            color = Color.White,
-                            modifier = Modifier.size(32.dp)
-                        )
-                    }
-                    ServiceLauncherState.Running -> Text("Disconnect")
-                    ServiceLauncherState.Stopped -> Text("Connect")
-                }
+                Text(state.vpnStatus.toTitle())
             }
         }
     }
+}
+
+private fun ServiceLauncherState.toTitle() = when (this) {
+    ServiceLauncherState.Loading -> "Loading..."
+    ServiceLauncherState.Running -> "Disconnect"
+    ServiceLauncherState.Stopped -> "Connect"
 }
