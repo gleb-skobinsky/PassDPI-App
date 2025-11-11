@@ -12,6 +12,7 @@ import kotlinx.cinterop.MemScope
 import kotlinx.cinterop.allocArray
 import kotlinx.cinterop.allocArrayOf
 import kotlinx.cinterop.cstr
+import kotlinx.cinterop.get
 import kotlinx.cinterop.memScoped
 import kotlinx.cinterop.nativeHeap
 import kotlinx.cinterop.set
@@ -20,22 +21,24 @@ import platform.posix.strdup
 @OptIn(ExperimentalForeignApi::class)
 object ByeDpiProxyAccessor {
     fun createSocket(args: Array<String>): Int {
-        return memScoped {
-            val argc = args.size
-
+        val argc = args.size
+        val argv = args.toPersistentCStringArray()
+        return try {
             val res = parseArgs(
                 argc = argc,
-                argv = args.toCArray(this)
+                argv = argv
             )
             if (res < 0) {
-                return@memScoped -1
+                return -1
             }
 
             val fd = listenSocket()
             if (fd < 0) {
-                return@memScoped -1
+                return -1
             }
             fd
+        } finally {
+            freeArgv(argv, argc)
         }
     }
 
@@ -76,12 +79,28 @@ object ByeDpiProxyAccessor {
 
     fun Array<String>.toPersistentCStringArray(): CPointer<CPointerVar<ByteVar>> {
         val argc = size
-        val argv = nativeHeap.allocArray<CPointerVar<ByteVar>>(argc + 1)
+        val argv = nativeHeap.allocArray<CPointerVar<ByteVar>>(argc)
         for (i in indices) {
-            argv[i] = strdup(this[i])
+            argv[i] = this[i].toNativeHeapCString()
         }
-        argv[argc] = null
         return argv
+    }
+
+    fun String.toNativeHeapCString(): CPointer<ByteVar> {
+        val bytes = this.encodeToByteArray() // UTF-8 bytes
+        val ptr = nativeHeap.allocArray<ByteVar>(bytes.size + 1) // +1 for NUL
+        for (i in bytes.indices) {
+            ptr[i] = bytes[i] // Byte -> ByteVar assignment
+        }
+        ptr[bytes.size] = 0 // null terminator
+        return ptr
+    }
+
+    private fun freeArgv(argv: CPointer<CPointerVar<ByteVar>>, argc: Int) {
+        for (i in 0 until argc) {
+            argv[i]?.let { nativeHeap.free(it.rawValue) }
+        }
+        nativeHeap.free(argv.rawValue)
     }
 }
 
