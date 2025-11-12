@@ -14,7 +14,7 @@ headerFilter = **
 package = org.cheburnet.passdpi.byedpi
 compilerOpts = -Isrc/nativeInterop/cinterop/byedpi
 
-linkerOpts = -Wl,-force_load,src/nativeInterop/cinterop/bin_macosx_arm64/libciadpi.a
+linkerOpts = -Lsrc/nativeInterop/cinterop/bin_macosx_arm64 -lciadpi
 
 staticLibraries.osx = libciadpi.a
 libraryPaths.osx = src/nativeInterop/cinterop/bin_macosx_arm64
