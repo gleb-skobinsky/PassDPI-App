@@ -34,7 +34,7 @@ object ByeDpiProxyAccessor {
             }
             fd
         } finally {
-            //freeArgv(argv, argc)
+            freeArgv(nativeArgs, argc)
         }
     }
 

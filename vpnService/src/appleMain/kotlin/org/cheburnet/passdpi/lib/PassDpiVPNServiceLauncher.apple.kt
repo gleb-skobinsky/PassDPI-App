@@ -7,7 +7,6 @@ import kotlinx.cinterop.alloc
 import kotlinx.cinterop.memScoped
 import kotlinx.cinterop.ptr
 import kotlinx.cinterop.value
-import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.IO
@@ -46,7 +45,6 @@ class PassDpiVPNServiceLauncherApple(
 
     private val mutex = Mutex()
     private val singleThreadedDispatcher = Dispatchers.IO.limitedParallelism(1)
-    private val scope = CoroutineScope(singleThreadedDispatcher)
     private val statusFromInteraction = MutableStateFlow(ServiceLauncherState.Stopped)
 
     override val connectionState = merge(
@@ -56,19 +54,9 @@ class PassDpiVPNServiceLauncherApple(
 
     private var currentTunnelManager: NETunnelProviderManager? = null
 
-    private val proxyManager = ByeDpiProxyManager {
-        println("PassDpiVPNServiceLauncherApple: $it")
-    }
-
 
     @OptIn(ExperimentalForeignApi::class, BetaInteropApi::class)
     override suspend fun startService() {
-        scope.launch {
-            val commandLineArgs = optionsStorage.getCommandLineArgs()
-            proxyManager.startProxy(cmdToArgs(commandLineArgs))
-        }
-        return
-
         withContext(singleThreadedDispatcher) {
             mutex.withLock(owner = this) {
                 statusFromInteraction.value = ServiceLauncherState.Loading
