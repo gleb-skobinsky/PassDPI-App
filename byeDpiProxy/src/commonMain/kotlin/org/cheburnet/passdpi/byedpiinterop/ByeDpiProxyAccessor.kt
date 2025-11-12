@@ -12,7 +12,6 @@ import kotlinx.cinterop.get
 import kotlinx.cinterop.memScoped
 import kotlinx.cinterop.nativeHeap
 import kotlinx.cinterop.set
-import kotlinx.cinterop.toKString
 
 @OptIn(ExperimentalForeignApi::class)
 object ByeDpiProxyAccessor {
@@ -35,15 +34,6 @@ object ByeDpiProxyAccessor {
             fd
         } finally {
             freeArgv(nativeArgs, argc)
-        }
-    }
-
-    fun dumpArgv(argv: CPointer<CPointerVar<ByteVar>>, argc: Int) {
-        println("argc = $argc, argv ptr = $argv")
-        for (i in 0 until argc) {
-            val p = argv[i]
-            println("argv[$i] ptr = $p")
-            println("argv[$i] = ${p?.toKString()}")
         }
     }
 
