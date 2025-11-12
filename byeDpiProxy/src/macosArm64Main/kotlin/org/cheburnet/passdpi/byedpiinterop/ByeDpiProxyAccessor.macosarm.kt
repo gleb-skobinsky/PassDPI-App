@@ -10,7 +10,7 @@ import kotlinx.cinterop.reinterpret
 import org.cheburnet.passdpi.byedpi.event_loop
 import org.cheburnet.passdpi.byedpi.listen_socket
 import org.cheburnet.passdpi.byedpi.params_
-import org.cheburnet.passdpi.byedpi.debug_print_args
+import org.cheburnet.passdpi.byedpi.parse_args
 import org.cheburnet.passdpi.byedpi.reset_params
 import org.cheburnet.passdpi.byedpi.sockaddr_ina
 import platform.posix.SHUT_RDWR
@@ -20,7 +20,7 @@ import platform.posix.shutdown
 actual fun parseArgs(
     argc: Int,
     argv: CValuesRef<CPointerVarOf<CPointer<ByteVarOf<Byte>>>>?,
-): Int = debug_print_args(argc, argv)
+): Int = parse_args(argc, argv)
 
 @OptIn(ExperimentalForeignApi::class)
 actual fun listenSocket(): Int {
