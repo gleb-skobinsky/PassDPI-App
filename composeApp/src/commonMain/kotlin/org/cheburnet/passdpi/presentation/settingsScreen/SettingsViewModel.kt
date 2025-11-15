@@ -44,10 +44,12 @@ class SettingsViewModel(
     }
 
     private fun EditableSettings.toState() = SettingsScreenState(
-        commandLineArgs = commandLineArgs
+        commandLineArgs = commandLineArgs,
+        proxyIp = proxyIp
     )
 
     private fun SettingsScreenState.toStorageSettings() = EditableSettings(
-        commandLineArgs = commandLineArgs
+        commandLineArgs = commandLineArgs,
+        proxyIp = proxyIp
     )
 }

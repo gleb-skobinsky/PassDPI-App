@@ -27,6 +27,7 @@ import kotlinx.coroutines.suspendCancellableCoroutine
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
 import kotlinx.coroutines.withContext
+import org.cheburnet.passdpi.store.EditableSettings
 import org.cheburnet.passdpi.store.PassDpiOptionsStorage
 import platform.Foundation.NSError
 import platform.NetworkExtension.NETunnelProviderManager
@@ -69,10 +70,10 @@ class PassDpiVPNServiceLauncherApple(
 
     override suspend fun startService() {
         mutex.withLock(owner = this) {
-            val commandLineArgs = optionsStorage.getCommandLineArgs()
-            startServiceWithManager(commandLineArgs)
+            val settings = optionsStorage.getEditableSettings()
+            startServiceWithManager(settings.commandLineArgs)
             logger.d("Service start complete")
-            startProxy(commandLineArgs)
+            startProxy(settings)
             logger.d("Proxy start complete")
         }
     }
@@ -88,11 +89,11 @@ class PassDpiVPNServiceLauncherApple(
         }
     }
 
-    private fun startProxy(args: String) {
+    private fun startProxy(settings: EditableSettings) {
         proxyJob = proxyScope.launch {
             try {
                 withContext(backgroundDispatcher) {
-                    proxy.startProxy(args)
+                    proxy.startProxy(settings)
                 }
             } catch (e: Exception) {
                 ensureActive()

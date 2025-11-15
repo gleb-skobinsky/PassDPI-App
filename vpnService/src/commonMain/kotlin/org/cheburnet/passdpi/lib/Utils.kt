@@ -1,9 +1,9 @@
 package org.cheburnet.passdpi.lib
 
-fun cmdToArgs(cmd: String): Array<String> {
+fun cmdToArgs(cmd: String): MutableList<String> {
     val firstArgIndex = cmd.indexOf("-")
     val argsStr = (if (firstArgIndex > 0) cmd.substring(firstArgIndex) else cmd).trim()
-    return arrayOf("ciadpi") + shellSplit(argsStr)
+    return mutableListOf("ciadpi").apply { addAll(shellSplit(argsStr)) }
 }
 
 fun shellSplit(string: CharSequence): List<String> {

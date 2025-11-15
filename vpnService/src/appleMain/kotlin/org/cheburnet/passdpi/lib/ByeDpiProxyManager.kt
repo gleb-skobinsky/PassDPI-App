@@ -1,6 +1,7 @@
 package org.cheburnet.passdpi.lib
 
 import org.cheburnet.passdpi.byedpiinterop.ByeDpiProxyAccessor
+import org.cheburnet.passdpi.store.EditableSettings
 import kotlin.concurrent.atomics.AtomicInt
 import kotlin.concurrent.atomics.ExperimentalAtomicApi
 
@@ -11,16 +12,23 @@ class ByeDpiProxyManager(
 
     private val fd = AtomicInt(-1)
 
-    fun startProxy(commandLineArguments: String) = startProxy(
-        cmdToArgs(commandLineArguments)
+    fun startProxy(settings: EditableSettings) = startProxy(
+        proxyIp = settings.proxyIp,
+        commandLineArguments = cmdToArgs(settings.commandLineArgs)
     )
 
     fun startProxy(
-        commandLineArguments: Array<String>,
+        proxyIp: String,
+        commandLineArguments: MutableList<String>,
     ): Int {
+        // Exclude ciadpi from search
+        if (!commandLineArguments.drop(1).any { "i" in it || "ip" in it }) {
+            logger.log("No ip found. Adding ip: $proxyIp")
+//            commandLineArguments.addAll(listOf("--ip", proxyIp))
+        }
         try {
-            logger.log("Right before socket create ${commandLineArguments.toList()}")
-            val fd = createSocket(commandLineArguments)
+            logger.log("Right before socket create $commandLineArguments")
+            val fd = createSocket(commandLineArguments.toTypedArray())
             if (fd < 0) {
                 return -1
             }
