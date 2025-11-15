@@ -30,7 +30,7 @@ actual fun listenSocket(): Int {
 @OptIn(ExperimentalForeignApi::class)
 actual fun startEventLoop(fd: Int): Int = event_loop(fd)
 
-actual fun shutDown(fd: Int): Int = shutdown(fd.toULong(), 0) // TODO: Fixme
+actual fun shutDown(fd: Int): Int = shutdown(fd.toULong(), 2) // TODO: Fixme
 
 @OptIn(ExperimentalForeignApi::class)
 actual fun resetParams() = reset_params()

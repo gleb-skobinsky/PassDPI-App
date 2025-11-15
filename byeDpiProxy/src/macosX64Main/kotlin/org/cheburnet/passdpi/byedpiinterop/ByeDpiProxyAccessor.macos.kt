@@ -7,14 +7,16 @@ import kotlinx.cinterop.CValuesRef
 import kotlinx.cinterop.ExperimentalForeignApi
 import kotlinx.cinterop.ptr
 import kotlinx.cinterop.reinterpret
+import kotlinx.cinterop.toKString
+import org.cheburnet.passdpi.byedpi.event_loop
 import org.cheburnet.passdpi.byedpi.listen_socket
 import org.cheburnet.passdpi.byedpi.params_
 import org.cheburnet.passdpi.byedpi.parse_args
 import org.cheburnet.passdpi.byedpi.reset_params
-import org.cheburnet.passdpi.byedpi.event_loop
 import org.cheburnet.passdpi.byedpi.sockaddr_ina
-import platform.posix.SHUT_RDWR
-import platform.posix.shutdown
+import platform.posix.close
+import platform.posix.errno
+import platform.posix.strerror
 
 @OptIn(ExperimentalForeignApi::class)
 actual fun parseArgs(
@@ -31,7 +33,16 @@ actual fun listenSocket(): Int {
 @OptIn(ExperimentalForeignApi::class)
 actual fun startEventLoop(fd: Int): Int = event_loop(fd)
 
-actual fun shutDown(fd: Int): Int = shutdown(fd, SHUT_RDWR)
+@OptIn(ExperimentalForeignApi::class)
+actual fun shutDown(fd: Int): Int {
+    val res = close(fd)
+    if (res < 0) {
+        throw SocketShutdownException(
+            strerror(errno)?.toKString().orEmpty()
+        )
+    }
+    return res
+}
 
 @OptIn(ExperimentalForeignApi::class)
 actual fun resetParams() = reset_params()

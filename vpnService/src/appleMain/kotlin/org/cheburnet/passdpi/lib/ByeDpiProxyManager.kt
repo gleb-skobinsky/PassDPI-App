@@ -1,11 +1,15 @@
 package org.cheburnet.passdpi.lib
 
 import org.cheburnet.passdpi.byedpiinterop.ByeDpiProxyAccessor
+import kotlin.concurrent.atomics.AtomicInt
+import kotlin.concurrent.atomics.ExperimentalAtomicApi
 
+@OptIn(ExperimentalAtomicApi::class)
 class ByeDpiProxyManager(
     private val logger: PassDpiLogger,
 ) {
-    private var fd = -1
+
+    private val fd = AtomicInt(-1)
 
     fun startProxy(commandLineArguments: String) = startProxy(
         cmdToArgs(commandLineArguments)
@@ -28,19 +32,24 @@ class ByeDpiProxyManager(
     }
 
     fun stopProxy(): Int {
-        if (fd < 0) {
+        val currentFd = fd.load()
+        if (currentFd < 0) {
             throw IllegalStateException("Proxy is not running")
         }
 
-        val result = ByeDpiProxyAccessor.stopProxy(fd)
+        val result = ByeDpiProxyAccessor.stopProxy(currentFd)
+        logger.log("Stop proxy result int code: $result")
         if (result == 0) {
-            fd = -1
+            fd.store(-1)
+        } else {
+            throw IllegalStateException("Failed to stop proxy")
         }
         return result
     }
 
     private fun createSocket(commandLineArguments: Array<String>): Int {
-        if (fd >= 0) {
+        val currentFd = fd.load()
+        if (currentFd >= 0) {
             throw IllegalStateException("Proxy is already running")
         }
 
@@ -49,7 +58,7 @@ class ByeDpiProxyManager(
         if (fd < 0) {
             return -1
         }
-        this.fd = fd
+        this.fd.store(fd)
         return fd
     }
 }

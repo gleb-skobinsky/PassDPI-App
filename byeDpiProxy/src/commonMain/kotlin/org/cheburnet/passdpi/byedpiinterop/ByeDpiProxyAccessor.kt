@@ -92,3 +92,5 @@ expect fun startEventLoop(fd: Int): Int
 expect fun shutDown(fd: Int): Int
 
 expect fun resetParams()
+
+class SocketShutdownException(posixError: String): IllegalStateException(posixError)

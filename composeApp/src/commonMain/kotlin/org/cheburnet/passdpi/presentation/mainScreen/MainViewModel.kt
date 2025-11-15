@@ -2,6 +2,7 @@ package org.cheburnet.passdpi.presentation.mainScreen
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import co.touchlab.kermit.Logger
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.ensureActive
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -16,6 +17,7 @@ import org.cheburnet.passdpi.lib.ServiceLauncherState
 class MainViewModel(
     private val vpnLauncher: PassDpiVPNServiceLauncher
 ) : ViewModel() {
+    private val logger = Logger.withTag("MainViewModel")
 
     private val _state = MutableStateFlow(MainScreenState.Initial)
     val state = _state.asStateFlow()
@@ -27,8 +29,14 @@ class MainViewModel(
             val currentState = _state.value
             try {
                 when (currentState.vpnStatus) {
-                    ServiceLauncherState.Stopped -> vpnLauncher.startService()
-                    ServiceLauncherState.Running -> vpnLauncher.stopService()
+                    ServiceLauncherState.Stopped -> {
+                        logger.d("Starting service")
+                        vpnLauncher.startService()
+                    }
+                    ServiceLauncherState.Running -> {
+                        logger.d("Stopping service")
+                        vpnLauncher.stopService()
+                    }
                     ServiceLauncherState.Loading -> Unit
                 }
             } catch (e: Exception) {

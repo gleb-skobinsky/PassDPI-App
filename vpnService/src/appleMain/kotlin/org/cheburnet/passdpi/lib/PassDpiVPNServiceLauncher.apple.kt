@@ -1,5 +1,6 @@
 package org.cheburnet.passdpi.lib
 
+import co.touchlab.kermit.Logger
 import kotlinx.cinterop.BetaInteropApi
 import kotlinx.cinterop.ExperimentalForeignApi
 import kotlinx.cinterop.ObjCObjectVar
@@ -7,11 +8,15 @@ import kotlinx.cinterop.alloc
 import kotlinx.cinterop.memScoped
 import kotlinx.cinterop.ptr
 import kotlinx.cinterop.value
+import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.IO
+import kotlinx.coroutines.Job
 import kotlinx.coroutines.channels.awaitClose
+import kotlinx.coroutines.currentCoroutineContext
 import kotlinx.coroutines.delay
+import kotlinx.coroutines.ensureActive
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.callbackFlow
@@ -42,6 +47,7 @@ internal const val OPTIONS_ENABLE_IPV6 = "OPTIONS_ENABLE_IPV6_KEY"
 class PassDpiVPNServiceLauncherApple(
     private val optionsStorage: PassDpiOptionsStorage,
 ) : PassDpiVPNServiceLauncher {
+    private val logger = Logger.withTag("PassDpiVPNServiceLauncherApple")
 
     private val mutex = Mutex()
     private val backgroundDispatcher = Dispatchers.IO.limitedParallelism(2)
@@ -52,6 +58,9 @@ class PassDpiVPNServiceLauncherApple(
         observeConnectionStatus()
     )
 
+    private val proxyScope = CoroutineScope(backgroundDispatcher)
+    private var proxyJob: Job? = null
+
     private var currentTunnelManager: NETunnelProviderManager? = null
 
     private val proxy = ByeDpiProxyManager {
@@ -59,14 +68,51 @@ class PassDpiVPNServiceLauncherApple(
     }
 
     override suspend fun startService() {
+        //mutex.withLock(owner = this) {
         val commandLineArgs = optionsStorage.getCommandLineArgs()
         startServiceWithManager(commandLineArgs)
+        logger.d("Service start complete")
         startProxy(commandLineArgs)
+        logger.d("Proxy start complete")
+        //}
     }
 
-    private suspend fun startProxy(args: String) {
-        withContext(backgroundDispatcher) {
-            proxy.startProxy(args)
+    override suspend fun stopService() {
+        return mutex.withLock(owner = this) {
+            withContext(backgroundDispatcher) {
+                stopProxySafe()
+                proxyJob?.cancel()
+                loadOrCreateManager().connection.stopVPNTunnel()
+                statusFromInteraction.value = ServiceLauncherState.Stopped
+            }
+        }
+    }
+
+    private fun startProxy(args: String) {
+        proxyJob = proxyScope.launch {
+            try {
+                withContext(backgroundDispatcher) {
+                    proxy.startProxy(args)
+                }
+            } catch (e: Exception) {
+                ensureActive()
+                logger.d(
+                    messageString = "Failed to start proxy",
+                    throwable = e
+                )
+            }
+        }
+    }
+
+    private suspend fun stopProxySafe() {
+        try {
+            proxy.stopProxy()
+        } catch (e: Exception) {
+            currentCoroutineContext()[Job]?.ensureActive()
+            logger.d(
+                messageString = "Failed to stop proxy",
+                throwable = e
+            )
         }
     }
 
@@ -150,13 +196,6 @@ class PassDpiVPNServiceLauncherApple(
     }
 
     private fun NSError.toException() = IllegalStateException(localizedDescription)
-
-    override suspend fun stopService() {
-        return mutex.withLock(owner = this) {
-            loadOrCreateManager().connection.stopVPNTunnel()
-            statusFromInteraction.value = ServiceLauncherState.Stopped
-        }
-    }
 
     private suspend fun loadOrCreateManager(): NETunnelProviderManager {
         return suspendCancellableCoroutine { continuation ->
