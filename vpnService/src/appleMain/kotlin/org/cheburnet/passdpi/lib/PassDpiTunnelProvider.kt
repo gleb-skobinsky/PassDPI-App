@@ -95,11 +95,8 @@ private data class TunnelProviderOptions(
 class PassDpiTunnelProviderDelegate(
     private val logger: PassDpiLogger,
 ) {
-    private val byeDpiProxy: ByeDpiProxyManager by lazy { ByeDpiProxyManager(logger) }
 
     private val coroutineScope = CoroutineScope(Dispatchers.IO)
-
-//    private val proxyWorker = Worker.start()
     private val tunnelWorker = Worker.start()
     private val mutex = Mutex()
 
@@ -198,7 +195,6 @@ class PassDpiTunnelProviderDelegate(
         coroutineScope.launch {
             mutex.withLock {
                 TunnelAccessor.stopTunnel()
-                byeDpiProxy.stopProxy()
                 logger.log("Stop tunnel complete")
             }
         }

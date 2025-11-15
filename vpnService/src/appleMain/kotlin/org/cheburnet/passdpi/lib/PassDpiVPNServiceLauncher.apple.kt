@@ -68,13 +68,13 @@ class PassDpiVPNServiceLauncherApple(
     }
 
     override suspend fun startService() {
-        //mutex.withLock(owner = this) {
-        val commandLineArgs = optionsStorage.getCommandLineArgs()
-        startServiceWithManager(commandLineArgs)
-        logger.d("Service start complete")
-        startProxy(commandLineArgs)
-        logger.d("Proxy start complete")
-        //}
+        mutex.withLock(owner = this) {
+            val commandLineArgs = optionsStorage.getCommandLineArgs()
+            startServiceWithManager(commandLineArgs)
+            logger.d("Service start complete")
+            startProxy(commandLineArgs)
+            logger.d("Proxy start complete")
+        }
     }
 
     override suspend fun stopService() {
@@ -119,56 +119,54 @@ class PassDpiVPNServiceLauncherApple(
     @OptIn(ExperimentalForeignApi::class, BetaInteropApi::class)
     private suspend fun startServiceWithManager(args: String) {
         withContext(backgroundDispatcher) {
-            mutex.withLock(owner = this) {
-                statusFromInteraction.value = ServiceLauncherState.Loading
 
-                val tunnelManager = loadOrCreateManager()
-                currentTunnelManager = tunnelManager
+            statusFromInteraction.value = ServiceLauncherState.Loading
 
-                val options = optionsStorage.getVpnOptions()
-                suspendCancellableCoroutine { continuation ->
-                    tunnelManager.loadFromPreferencesWithCompletionHandler { error ->
+            val tunnelManager = loadOrCreateManager()
+            currentTunnelManager = tunnelManager
+
+            val options = optionsStorage.getVpnOptions()
+            suspendCancellableCoroutine { continuation ->
+                tunnelManager.loadFromPreferencesWithCompletionHandler { error ->
+                    error?.let {
+                        continuation.resumeWithException(error.toException())
+                    }
+                    tunnelManager.saveToPreferencesWithCompletionHandler { error ->
                         error?.let {
                             continuation.resumeWithException(error.toException())
                         }
-                        tunnelManager.saveToPreferencesWithCompletionHandler { error ->
-                            error?.let {
-                                continuation.resumeWithException(error.toException())
-                            }
-                            try {
-                                memScoped {
-                                    val errorPtr: ObjCObjectVar<NSError?> =
-                                        alloc<ObjCObjectVar<NSError?>>()
-                                    val isSuccess = tunnelManager.connection
-                                        .startVPNTunnelWithOptions(
-                                            options = mapOf(
-                                                OPTIONS_CMD_LINE_ARGS to args,
-                                                OPTIONS_PORT_KEY to options.port,
-                                                OPTIONS_DNS_IP to options.dnsIp,
-                                                OPTIONS_ENABLE_IPV6 to options.enableIpV6.toString()
-                                            ),
-                                            andReturnError = errorPtr.ptr
-                                        )
-                                    val error = errorPtr.value
-                                    when {
-                                        !isSuccess -> continuation.resumeWithException(
-                                            IllegalStateException("Failed to start VPN service")
-                                        )
+                        try {
+                            memScoped {
+                                val errorPtr: ObjCObjectVar<NSError?> =
+                                    alloc<ObjCObjectVar<NSError?>>()
+                                val isSuccess = tunnelManager.connection
+                                    .startVPNTunnelWithOptions(
+                                        options = mapOf(
+                                            OPTIONS_CMD_LINE_ARGS to args,
+                                            OPTIONS_PORT_KEY to options.port,
+                                            OPTIONS_DNS_IP to options.dnsIp,
+                                            OPTIONS_ENABLE_IPV6 to options.enableIpV6.toString()
+                                        ),
+                                        andReturnError = errorPtr.ptr
+                                    )
+                                val error = errorPtr.value
+                                when {
+                                    !isSuccess -> continuation.resumeWithException(
+                                        IllegalStateException("Failed to start VPN service")
+                                    )
 
-                                        error != null -> continuation.resumeWithException(error.toException())
-                                        else -> continuation.resume(Unit)
-                                    }
+                                    error != null -> continuation.resumeWithException(error.toException())
+                                    else -> continuation.resume(Unit)
                                 }
-                            } catch (e: Exception) {
-                                continuation.resumeWithException(e)
                             }
+                        } catch (e: Exception) {
+                            continuation.resumeWithException(e)
                         }
                     }
                 }
-                statusFromInteraction.value = ServiceLauncherState.Running
             }
+            statusFromInteraction.value = ServiceLauncherState.Running
         }
-
     }
 
     @OptIn(ExperimentalCoroutinesApi::class)

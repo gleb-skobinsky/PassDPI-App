@@ -14,8 +14,10 @@ import org.cheburnet.passdpi.byedpi.params_
 import org.cheburnet.passdpi.byedpi.parse_args
 import org.cheburnet.passdpi.byedpi.reset_params
 import org.cheburnet.passdpi.byedpi.sockaddr_ina
+import platform.posix.SHUT_RDWR
 import platform.posix.close
 import platform.posix.errno
+import platform.posix.shutdown
 import platform.posix.strerror
 
 @OptIn(ExperimentalForeignApi::class)
@@ -35,6 +37,7 @@ actual fun startEventLoop(fd: Int): Int = event_loop(fd)
 
 @OptIn(ExperimentalForeignApi::class)
 actual fun shutDown(fd: Int): Int {
+    shutdown(fd, SHUT_RDWR)
     val res = close(fd)
     if (res < 0) {
         throw SocketShutdownException(
