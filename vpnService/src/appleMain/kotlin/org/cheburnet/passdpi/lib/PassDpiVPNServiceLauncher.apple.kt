@@ -44,7 +44,7 @@ class PassDpiVPNServiceLauncherApple(
 ) : PassDpiVPNServiceLauncher {
 
     private val mutex = Mutex()
-    private val singleThreadedDispatcher = Dispatchers.IO.limitedParallelism(1)
+    private val backgroundDispatcher = Dispatchers.IO.limitedParallelism(2)
     private val statusFromInteraction = MutableStateFlow(ServiceLauncherState.Stopped)
 
     override val connectionState = merge(
@@ -54,15 +54,31 @@ class PassDpiVPNServiceLauncherApple(
 
     private var currentTunnelManager: NETunnelProviderManager? = null
 
+    private val proxy = ByeDpiProxyManager {
+        println("PassDpiVPNServiceLauncher $it")
+    }
+
+    override suspend fun startService() {
+        val commandLineArgs = optionsStorage.getCommandLineArgs()
+        startServiceWithManager(commandLineArgs)
+        startProxy(commandLineArgs)
+    }
+
+    private suspend fun startProxy(args: String) {
+        withContext(backgroundDispatcher) {
+            proxy.startProxy(args)
+        }
+    }
 
     @OptIn(ExperimentalForeignApi::class, BetaInteropApi::class)
-    override suspend fun startService() {
-        withContext(singleThreadedDispatcher) {
+    private suspend fun startServiceWithManager(args: String) {
+        withContext(backgroundDispatcher) {
             mutex.withLock(owner = this) {
                 statusFromInteraction.value = ServiceLauncherState.Loading
+
                 val tunnelManager = loadOrCreateManager()
                 currentTunnelManager = tunnelManager
-                val commandLineArgs = optionsStorage.getCommandLineArgs()
+
                 val options = optionsStorage.getVpnOptions()
                 suspendCancellableCoroutine { continuation ->
                     tunnelManager.loadFromPreferencesWithCompletionHandler { error ->
@@ -80,7 +96,7 @@ class PassDpiVPNServiceLauncherApple(
                                     val isSuccess = tunnelManager.connection
                                         .startVPNTunnelWithOptions(
                                             options = mapOf(
-                                                OPTIONS_CMD_LINE_ARGS to commandLineArgs,
+                                                OPTIONS_CMD_LINE_ARGS to args,
                                                 OPTIONS_PORT_KEY to options.port,
                                                 OPTIONS_DNS_IP to options.dnsIp,
                                                 OPTIONS_ENABLE_IPV6 to options.enableIpV6.toString()
@@ -106,6 +122,7 @@ class PassDpiVPNServiceLauncherApple(
                 statusFromInteraction.value = ServiceLauncherState.Running
             }
         }
+
     }
 
     @OptIn(ExperimentalCoroutinesApi::class)

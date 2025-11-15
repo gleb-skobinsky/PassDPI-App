@@ -7,17 +7,19 @@ class ByeDpiProxyManager(
 ) {
     private var fd = -1
 
+    fun startProxy(commandLineArguments: String) = startProxy(
+        cmdToArgs(commandLineArguments)
+    )
+
     fun startProxy(
         commandLineArguments: Array<String>,
     ): Int {
         try {
-            logger.log("Right before socket create fd $commandLineArguments")
+            logger.log("Right before socket create ${commandLineArguments.toList()}")
             val fd = createSocket(commandLineArguments)
-            logger.log("Right after socket create $fd")
             if (fd < 0) {
                 return -1
             }
-            logger.log("File descriptor: $fd")
             return ByeDpiProxyAccessor.startProxy(fd)
         } catch (e: Exception) {
             logger.log(e.stackTraceToString())
@@ -43,6 +45,7 @@ class ByeDpiProxyManager(
         }
 
         val fd = ByeDpiProxyAccessor.createSocket(commandLineArguments)
+        logger.log("File descriptor after create socket: $fd")
         if (fd < 0) {
             return -1
         }

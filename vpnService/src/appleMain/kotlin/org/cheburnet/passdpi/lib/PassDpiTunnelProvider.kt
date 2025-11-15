@@ -99,7 +99,7 @@ class PassDpiTunnelProviderDelegate(
 
     private val coroutineScope = CoroutineScope(Dispatchers.IO)
 
-    private val proxyWorker = Worker.start()
+//    private val proxyWorker = Worker.start()
     private val tunnelWorker = Worker.start()
     private val mutex = Mutex()
 
@@ -165,6 +165,7 @@ class PassDpiTunnelProviderDelegate(
                     }
                     logger.log("Before proxy start")
 
+                    /*
                     proxyWorker.launch {
                         val args = cmdToArgs(vpnOptions.cmdArgs)
                         logger.log("Args: ${args.toList()}")
@@ -173,6 +174,8 @@ class PassDpiTunnelProviderDelegate(
                         )
                         logger.log("Proxy setup! proxy code $result")
                     }
+
+                     */
                     tunnelWorker.launch {
                         logger.log("Right before start tunnel!")
                         TunnelAccessor.startTunnel(
