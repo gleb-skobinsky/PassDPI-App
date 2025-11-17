@@ -51,7 +51,7 @@ class PassDpiVPNServiceLauncherApple(
     private val logger = Logger.withTag("PassDpiVPNServiceLauncherApple")
 
     private val mutex = Mutex()
-    private val backgroundDispatcher = Dispatchers.IO.limitedParallelism(2)
+    private val backgroundDispatcher = Dispatchers.IO
     private val statusFromInteraction = MutableStateFlow(ServiceLauncherState.Stopped)
 
     override val connectionState = merge(
@@ -79,10 +79,9 @@ class PassDpiVPNServiceLauncherApple(
     }
 
     override suspend fun stopService() {
-        return mutex.withLock(owner = this) {
+        mutex.withLock(owner = this) {
             withContext(backgroundDispatcher) {
                 stopProxySafe()
-                proxyJob?.cancel()
                 loadOrCreateManager().connection.stopVPNTunnel()
                 statusFromInteraction.value = ServiceLauncherState.Stopped
             }
@@ -92,9 +91,7 @@ class PassDpiVPNServiceLauncherApple(
     private fun startProxy(settings: EditableSettings) {
         proxyJob = proxyScope.launch {
             try {
-                withContext(backgroundDispatcher) {
-                    proxy.startProxy(settings)
-                }
+                proxy.startProxy(settings)
             } catch (e: Exception) {
                 ensureActive()
                 logger.d(
@@ -108,6 +105,7 @@ class PassDpiVPNServiceLauncherApple(
     private suspend fun stopProxySafe() {
         try {
             proxy.stopProxy()
+            proxyJob?.cancel()
         } catch (e: Exception) {
             currentCoroutineContext()[Job]?.ensureActive()
             logger.d(
