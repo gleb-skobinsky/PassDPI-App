@@ -12,10 +12,21 @@ import kotlinx.cinterop.get
 import kotlinx.cinterop.memScoped
 import kotlinx.cinterop.nativeHeap
 import kotlinx.cinterop.set
+import kotlin.concurrent.AtomicReference
 
 @OptIn(ExperimentalForeignApi::class)
 object ByeDpiProxyAccessor {
+    private val nativeLoaded = AtomicReference(false)
+
+    fun maybeLoad() {
+        if (!nativeLoaded.value) {
+            saveParamsToDefaultParams()
+        }
+        nativeLoaded.value = true
+    }
+
     fun createSocket(args: Array<String>): Int = memScoped {
+        maybeLoad()
         val argc = args.size
         val nativeArgs = args.toPersistentCStringArray()
         return try {
@@ -54,7 +65,7 @@ object ByeDpiProxyAccessor {
     }
 
 
-    fun Array<String>.toPersistentCStringArray(): CPointer<CPointerVar<ByteVar>> {
+    private fun Array<String>.toPersistentCStringArray(): CPointer<CPointerVar<ByteVar>> {
         val argc = size
         val argv = nativeHeap.allocArray<CPointerVar<ByteVar>>(argc)
         for (i in indices) {
@@ -63,7 +74,7 @@ object ByeDpiProxyAccessor {
         return argv
     }
 
-    fun String.toNativeHeapCString(): CPointer<ByteVar> {
+    private fun String.toNativeHeapCString(): CPointer<ByteVar> {
         val bytes = this.encodeToByteArray()
         val ptr = nativeHeap.allocArray<ByteVar>(bytes.size + 1)
         for (i in bytes.indices) ptr[i] = bytes[i]
@@ -92,5 +103,7 @@ expect fun startEventLoop(fd: Int): Int
 expect fun shutDown(fd: Int): Int
 
 expect fun resetParams()
+
+expect fun saveParamsToDefaultParams()
 
 class SocketShutdownException(posixError: String): IllegalStateException(posixError)

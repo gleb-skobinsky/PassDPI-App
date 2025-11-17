@@ -5,14 +5,24 @@ import org.cheburnet.passdpi.store.EditableSettings
 import kotlin.concurrent.atomics.AtomicInt
 import kotlin.concurrent.atomics.ExperimentalAtomicApi
 
+interface ByeDpiProxyManager {
+    fun startProxy(settings: EditableSettings): Int
+
+    fun stopProxy(): Int
+}
+
+fun ByeDpiProxyManager(logger: PassDpiLogger): ByeDpiProxyManager {
+    return ByeDpiProxyManagerImpl(logger)
+}
+
 @OptIn(ExperimentalAtomicApi::class)
-class ByeDpiProxyManager(
+private class ByeDpiProxyManagerImpl(
     private val logger: PassDpiLogger,
-) {
+) : ByeDpiProxyManager {
 
     private val fd = AtomicInt(-1)
 
-    fun startProxy(settings: EditableSettings) = startProxy(
+    override fun startProxy(settings: EditableSettings): Int = startProxy(
         proxyIp = settings.proxyIp,
         commandLineArguments = cmdToArgs(settings.commandLineArgs)
     )
@@ -21,11 +31,14 @@ class ByeDpiProxyManager(
         proxyIp: String,
         commandLineArguments: MutableList<String>,
     ): Int {
+        ByeDpiProxyAccessor.maybeLoad()
+        /*
         // Exclude ciadpi from search
         if (!commandLineArguments.drop(1).any { "i" in it || "ip" in it }) {
             logger.log("No ip found. Adding ip: $proxyIp")
-//            commandLineArguments.addAll(listOf("--ip", proxyIp))
+            commandLineArguments.addAll(listOf("--ip", proxyIp))
         }
+         */
         try {
             logger.log("Right before socket create $commandLineArguments")
             val fd = createSocket(commandLineArguments.toTypedArray())
@@ -39,7 +52,8 @@ class ByeDpiProxyManager(
         }
     }
 
-    fun stopProxy(): Int {
+    override fun stopProxy(): Int {
+        ByeDpiProxyAccessor.maybeLoad()
         val currentFd = fd.load()
         if (currentFd < 0) {
             throw IllegalStateException("Proxy is not running")

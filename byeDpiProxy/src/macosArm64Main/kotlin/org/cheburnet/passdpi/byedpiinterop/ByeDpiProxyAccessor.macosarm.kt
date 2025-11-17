@@ -5,11 +5,15 @@ import kotlinx.cinterop.CPointer
 import kotlinx.cinterop.CPointerVarOf
 import kotlinx.cinterop.CValuesRef
 import kotlinx.cinterop.ExperimentalForeignApi
+import kotlinx.cinterop.convert
 import kotlinx.cinterop.ptr
 import kotlinx.cinterop.reinterpret
+import kotlinx.cinterop.sizeOf
 import kotlinx.cinterop.toKString
+import org.cheburnet.passdpi.byedpi.default_params
 import org.cheburnet.passdpi.byedpi.event_loop
 import org.cheburnet.passdpi.byedpi.listen_socket
+import org.cheburnet.passdpi.byedpi.params
 import org.cheburnet.passdpi.byedpi.params_
 import org.cheburnet.passdpi.byedpi.parse_args
 import org.cheburnet.passdpi.byedpi.reset_params
@@ -19,6 +23,7 @@ import platform.posix.close
 import platform.posix.errno
 import platform.posix.shutdown
 import platform.posix.strerror
+import platform.posix.memcpy
 
 @OptIn(ExperimentalForeignApi::class)
 actual fun parseArgs(
@@ -49,3 +54,12 @@ actual fun shutDown(fd: Int): Int {
 
 @OptIn(ExperimentalForeignApi::class)
 actual fun resetParams() = reset_params()
+
+@OptIn(ExperimentalForeignApi::class)
+actual fun saveParamsToDefaultParams() {
+    memcpy(
+        __dst = default_params.ptr,
+        __src = params_.ptr,
+        __n = sizeOf<params>().convert()
+    )
+}
