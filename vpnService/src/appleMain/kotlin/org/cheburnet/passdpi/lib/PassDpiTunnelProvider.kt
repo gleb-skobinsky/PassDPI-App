@@ -157,7 +157,7 @@ class PassDpiTunnelProviderDelegate(
                 val dnsSettings = NEDNSSettings(servers = listOf(vpnOptions.dnsIp))
                 settings.DNSSettings = dnsSettings
 
-                logger.log("Command line args: ${vpnOptions.cmdArgs}")
+                logger.log("Command line args: ${vpnOptions.cmdArgs} config path: $configPath")
                 onSetNetworkSettings(settings) { error ->
                     if (error != null) {
                         logger.log("Set settings error")
@@ -254,7 +254,7 @@ class PassDpiTunnelProviderDelegate(
             completionHandler(logAndGetError("Failed to write config file to ${configUrl.path}"))
             return null
         }
-        return configUrl.absoluteString!!
+        return configUrl.path
     }
 
     private fun logAndGetError(
