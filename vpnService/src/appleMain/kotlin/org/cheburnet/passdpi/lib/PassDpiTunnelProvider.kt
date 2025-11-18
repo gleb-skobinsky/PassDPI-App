@@ -13,7 +13,6 @@ import kotlinx.coroutines.cancel
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
-import org.cheburnet.passdpi.store.EditableSettings
 import org.cheburnet.passdpi.store.PassDpiOptionsStorage
 import org.cheburnet.passdpi.tunnel.TunnelAccessor
 import platform.Foundation.NSDocumentDirectory

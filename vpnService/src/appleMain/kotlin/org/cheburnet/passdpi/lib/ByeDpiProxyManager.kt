@@ -1,7 +1,6 @@
 package org.cheburnet.passdpi.lib
 
 import org.cheburnet.passdpi.byedpiinterop.ByeDpiProxyAccessor
-import org.cheburnet.passdpi.store.EditableSettings
 import kotlin.concurrent.atomics.AtomicInt
 import kotlin.concurrent.atomics.ExperimentalAtomicApi
 
