@@ -152,6 +152,7 @@ class PassDpiTunnelProviderDelegate(
                         networkPrefixLengths = listOf(128)
                     )
                     ipV6.includedRoutes = listOf(NEIPv6Route.defaultRoute())
+                    settings.IPv6Settings = ipV6
                 }
 
                 val dnsSettings = NEDNSSettings(servers = listOf(vpnOptions.dnsIp))
