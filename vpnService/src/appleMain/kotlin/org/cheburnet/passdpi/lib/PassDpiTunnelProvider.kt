@@ -190,12 +190,8 @@ class PassDpiTunnelProviderDelegate(
                     }
                     proxyWorker.launch {
                         logger.log("Right before start proxy")
-                        proxy.startProxy(
-                            EditableSettings(
-                                commandLineArgs = vpnOptions.cmdArgs,
-                                proxyIp = ""
-                            )
-                        )
+                        val result = proxy.startProxy(vpnOptions.cmdArgs)
+                        logger.log("Start proxy result code: $result")
                     }
                     logger.log("Start tunnel complete")
                     completionHandler(null)

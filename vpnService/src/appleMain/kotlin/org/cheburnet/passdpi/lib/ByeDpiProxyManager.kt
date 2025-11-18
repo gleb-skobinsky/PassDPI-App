@@ -6,7 +6,7 @@ import kotlin.concurrent.atomics.AtomicInt
 import kotlin.concurrent.atomics.ExperimentalAtomicApi
 
 interface ByeDpiProxyManager {
-    fun startProxy(settings: EditableSettings): Int
+    fun startProxy(commandLineArguments: String): Int
 
     fun stopProxy(): Int
 }
@@ -22,14 +22,12 @@ private class ByeDpiProxyManagerImpl(
 
     private val fd = AtomicInt(-1)
 
-    override fun startProxy(settings: EditableSettings): Int = startProxy(
-        proxyIp = settings.proxyIp,
-        commandLineArguments = cmdToArgs(settings.commandLineArgs)
+    override fun startProxy(commandLineArguments: String): Int = startProxy(
+        commandLineArguments = cmdToArgs(commandLineArguments)
     )
 
-    fun startProxy(
-        proxyIp: String,
-        commandLineArguments: MutableList<String>,
+    private fun startProxy(
+        commandLineArguments: List<String>,
     ): Int {
         ByeDpiProxyAccessor.maybeLoad()
         /*

@@ -8,15 +8,11 @@ import kotlinx.cinterop.alloc
 import kotlinx.cinterop.memScoped
 import kotlinx.cinterop.ptr
 import kotlinx.cinterop.value
-import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.IO
-import kotlinx.coroutines.Job
 import kotlinx.coroutines.channels.awaitClose
-import kotlinx.coroutines.currentCoroutineContext
 import kotlinx.coroutines.delay
-import kotlinx.coroutines.ensureActive
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.callbackFlow
@@ -27,7 +23,6 @@ import kotlinx.coroutines.suspendCancellableCoroutine
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
 import kotlinx.coroutines.withContext
-import org.cheburnet.passdpi.store.EditableSettings
 import org.cheburnet.passdpi.store.PassDpiOptionsStorage
 import platform.Foundation.NSError
 import platform.NetworkExtension.NETunnelProviderManager
@@ -59,59 +54,22 @@ class PassDpiVPNServiceLauncherApple(
         observeConnectionStatus()
     )
 
-    private val proxyScope = CoroutineScope(backgroundDispatcher)
-    private var proxyJob: Job? = null
-
     private var currentTunnelManager: NETunnelProviderManager? = null
-
-    private val proxy = ByeDpiProxyManager {
-        println("PassDpiVPNServiceLauncher $it")
-    }
 
     override suspend fun startService() {
         mutex.withLock(owner = this) {
             val settings = optionsStorage.getEditableSettings()
             startServiceWithManager(settings.commandLineArgs)
             logger.d("Service start complete")
-//            startProxy(settings)
-//            logger.d("Proxy start complete")
         }
     }
 
     override suspend fun stopService() {
         mutex.withLock(owner = this) {
             withContext(backgroundDispatcher) {
-                stopProxySafe()
                 loadOrCreateManager().connection.stopVPNTunnel()
                 statusFromInteraction.value = ServiceLauncherState.Stopped
             }
-        }
-    }
-
-    private fun startProxy(settings: EditableSettings) {
-        proxyJob = proxyScope.launch {
-            try {
-                proxy.startProxy(settings)
-            } catch (e: Exception) {
-                ensureActive()
-                logger.d(
-                    messageString = "Failed to start proxy",
-                    throwable = e
-                )
-            }
-        }
-    }
-
-    private suspend fun stopProxySafe() {
-        try {
-            proxy.stopProxy()
-            proxyJob?.cancel()
-        } catch (e: Exception) {
-            currentCoroutineContext()[Job]?.ensureActive()
-            logger.d(
-                messageString = "Failed to stop proxy",
-                throwable = e
-            )
         }
     }
 
