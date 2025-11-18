@@ -13,6 +13,7 @@ import kotlinx.coroutines.cancel
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
+import org.cheburnet.passdpi.store.EditableSettings
 import org.cheburnet.passdpi.store.PassDpiOptionsStorage
 import org.cheburnet.passdpi.tunnel.TunnelAccessor
 import platform.Foundation.NSDocumentDirectory
@@ -98,6 +99,13 @@ class PassDpiTunnelProviderDelegate(
 
     private val coroutineScope = CoroutineScope(Dispatchers.IO)
     private val tunnelWorker = Worker.start()
+
+    private val proxyWorker = Worker.start()
+
+    private val proxy by lazy {
+        ByeDpiProxyManager(logger)
+    }
+
     private val mutex = Mutex()
 
     fun startPassDpiTunnel(
@@ -180,6 +188,15 @@ class PassDpiTunnelProviderDelegate(
                             fd = fd
                         )
                     }
+                    proxyWorker.launch {
+                        logger.log("Right before start proxy")
+                        proxy.startProxy(
+                            EditableSettings(
+                                commandLineArgs = vpnOptions.cmdArgs,
+                                proxyIp = ""
+                            )
+                        )
+                    }
                     logger.log("Start tunnel complete")
                     completionHandler(null)
                 }
@@ -195,7 +212,8 @@ class PassDpiTunnelProviderDelegate(
         coroutineScope.launch {
             mutex.withLock {
                 TunnelAccessor.stopTunnel()
-                logger.log("Stop tunnel complete")
+                proxy.stopProxy()
+                logger.log("Stop tunnel and proxy complete")
             }
         }
     }

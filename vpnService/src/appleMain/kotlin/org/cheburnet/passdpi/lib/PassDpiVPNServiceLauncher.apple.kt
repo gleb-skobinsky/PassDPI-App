@@ -73,8 +73,8 @@ class PassDpiVPNServiceLauncherApple(
             val settings = optionsStorage.getEditableSettings()
             startServiceWithManager(settings.commandLineArgs)
             logger.d("Service start complete")
-            startProxy(settings)
-            logger.d("Proxy start complete")
+//            startProxy(settings)
+//            logger.d("Proxy start complete")
         }
     }
 
