@@ -167,25 +167,16 @@ class PassDpiTunnelProviderDelegate(
                         completionHandler(logAndGetError("Couldn't obtain fd from packets"))
                         return@onSetNetworkSettings
                     }
+                    logger.log("Tunnel provider from packet flow: $fd")
                     logger.log("Before proxy start")
 
-                    /*
-                    proxyWorker.launch {
-                        val args = cmdToArgs(vpnOptions.cmdArgs)
-                        logger.log("Args: ${args.toList()}")
-                        val result = byeDpiProxy.startProxy(
-                            commandLineArguments = cmdToArgs(vpnOptions.cmdArgs),
-                        )
-                        logger.log("Proxy setup! proxy code $result")
-                    }
-
-                     */
                     tunnelWorker.launch {
                         logger.log("Right before start tunnel!")
-                        TunnelAccessor.startTunnel(
+                        val resultCode = TunnelAccessor.startTunnel(
                             configPath = configPath,
                             fd = fd
                         )
+                        logger.log("Start tunnel exited with code $resultCode")
                     }
                     proxyWorker.launch {
                         logger.log("Right before start proxy")
