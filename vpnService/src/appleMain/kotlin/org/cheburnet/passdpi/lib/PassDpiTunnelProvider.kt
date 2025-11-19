@@ -124,20 +124,12 @@ class PassDpiTunnelProviderDelegate(
                     return@launch
                 }
                 logger.log("Retrieved options successfully: $vpnOptions")
-                val tun2socksConfig = """
-                | misc:
-                |   task-stack-size: 81920
-                | socks5:
-                |   mtu: 8500
-                |   address: 127.0.0.1
-                |   port: ${vpnOptions.port}
-                |   udp: udp
-                """.trimMargin("| ")
-                logger.log("Writing to file")
-                val configPath = writeConfigToFile(
-                    tunConfig = tun2socksConfig,
-                    completionHandler = completionHandler
-                ) ?: return@withLock
+                val configPath = writeHevSocks5TunnelConfig(
+                    port = vpnOptions.port,
+                ) ?: run {
+                    completionHandler(logAndGetError("Failed to write config to file"))
+                    return@withLock
+                }
                 val primaryIp = getPrimaryIPv4Address() ?: "10.0.0.1"
                 logger.log("Using remote address: $primaryIp")
                 val settings = NEPacketTunnelNetworkSettings(tunnelRemoteAddress = primaryIp)
@@ -234,34 +226,6 @@ class PassDpiTunnelProviderDelegate(
         return@memScoped packetFlow.valueForKey("socket.fileDescriptor") as? Int
     }
 
-    @Suppress("CAST_NEVER_SUCCEEDS")
-    private fun writeConfigToFile(
-        tunConfig: String,
-        completionHandler: (NSError?) -> Unit,
-    ): String? {
-        val configUrl: NSURL = NSFileManager.defaultManager.URLForDirectory(
-            directory = NSDocumentDirectory,
-            inDomain = NSUserDomainMask,
-            appropriateForURL = null,
-            create = false,
-            error = null,
-        )?.URLByAppendingPathComponent(CONFIG_FULL_NAME) ?: run {
-            completionHandler(logAndGetError("Could not create config file"))
-            return null
-        }
-        val nsString = tunConfig as NSString
-        val data = nsString.dataUsingEncoding(NSUTF8StringEncoding) ?: run {
-            completionHandler(logAndGetError("Could not create config file"))
-            return null
-        }
-        val success = data.writeToURL(configUrl, atomically = true)
-        if (!success) {
-            completionHandler(logAndGetError("Failed to write config file to ${configUrl.path}"))
-            return null
-        }
-        return configUrl.path
-    }
-
     private fun logAndGetError(
         msg: String,
     ): NSError {
@@ -272,4 +236,43 @@ class PassDpiTunnelProviderDelegate(
             userInfo = mapOf(NSLocalizedDescriptionKey to msg)
         )
     }
+}
+
+@OptIn(ExperimentalForeignApi::class)
+@Suppress("CAST_NEVER_SUCCEEDS")
+private fun writeConfigToFile(
+    tunConfig: String,
+): String? {
+    val configUrl: NSURL = NSFileManager.defaultManager.URLForDirectory(
+        directory = NSDocumentDirectory,
+        inDomain = NSUserDomainMask,
+        appropriateForURL = null,
+        create = false,
+        error = null,
+    )?.URLByAppendingPathComponent(CONFIG_FULL_NAME) ?: return null
+    val nsString = tunConfig as NSString
+    val data = nsString.dataUsingEncoding(NSUTF8StringEncoding) ?: return null
+
+    val success = data.writeToURL(configUrl, atomically = true)
+    if (!success) {
+        return null
+    }
+    return configUrl.path
+}
+
+internal fun writeHevSocks5TunnelConfig(
+    port: Long,
+): String? {
+    val tun2socksConfig = """
+    | misc:
+    |   task-stack-size: 81920
+    | socks5:
+    |   mtu: 8500
+    |   address: 127.0.0.1
+    |   port: $port
+    |   udp: udp
+    """.trimMargin("| ")
+    return writeConfigToFile(
+        tunConfig = tun2socksConfig,
+    )
 }
