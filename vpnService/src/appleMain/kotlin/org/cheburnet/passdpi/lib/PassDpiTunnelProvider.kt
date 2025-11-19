@@ -138,7 +138,7 @@ class PassDpiTunnelProviderDelegate(
                     return@withLock
                 }
 
-                val settings = createSettings(vpnOptions.enableIpV6) ?: run {
+                val settings = createSettings2(vpnOptions.enableIpV6, vpnOptions.dnsIp) ?: run {
                     completionHandler(logAndGetError("Failed to create tunnel network settings!"))
                     return@withLock
                 }
@@ -176,8 +176,44 @@ class PassDpiTunnelProviderDelegate(
         }
     }
 
+    private fun createSettings2(
+        enableIpV6: Boolean,
+        dnsIp: String,
+    ): NEPacketTunnelNetworkSettings? {
+        val settings = NEPacketTunnelNetworkSettings(tunnelRemoteAddress = "198.18.0.254")
+        val ipv4Settings = NEIPv4Settings(
+            addresses = listOf("198.18.0.1"), // TUNNEL_IPV4_ADDRESS
+            subnetMasks = listOf("255.255.255.0")
+        )
+        val defaultIPv4Route = NEIPv4Route.defaultRoute()
+        val socksServerIP = "10.0.0.1"
+        val gatewayIP = "10.0.2.2"
+        val socksBypassRoute = NEIPv4Route(
+            destinationAddress = socksServerIP,
+            subnetMask = "255.255.255.255"
+        )
+        socksBypassRoute.gatewayAddress = gatewayIP
+        ipv4Settings.includedRoutes = listOf(socksBypassRoute, defaultIPv4Route)
+        ipv4Settings.excludedRoutes = emptyList<NEIPv4Route>()
+        settings.IPv4Settings = ipv4Settings
+
+        val ipv6Settings = NEIPv6Settings(
+            addresses = listOf("fc00::1"), // TUNNEL_IPV6_ADDRESS
+            networkPrefixLengths = listOf(64)
+        )
+        val defaultIPv6Route = NEIPv6Route.defaultRoute()
+        ipv6Settings.includedRoutes = listOf(defaultIPv6Route)
+        settings.IPv6Settings = ipv6Settings
+        val dnsSettings = NEDNSSettings(servers = listOf(dnsIp))
+        dnsSettings.matchDomains = listOf("")
+        settings.DNSSettings = dnsSettings
+        settings.MTU = NSNumber(8500) // TUNNEL_MTU
+        return settings
+    }
+
     private fun createSettings(
         enableIpV6: Boolean,
+        dnsIp: String,
     ): NEPacketTunnelNetworkSettings? {
         val subnetMask = "255.255.255.0"   // usually /24 is expected for 198.18.x.x
         val ipv6Prefix = 64                // typical for ULA fc00::/64
@@ -226,7 +262,7 @@ class PassDpiTunnelProviderDelegate(
         settings.MTU = NSNumber(TUNNEL_MTU)
 
         // DNS
-        settings.DNSSettings = NEDNSSettings(servers = listOf("1.1.1.1"))
+        settings.DNSSettings = NEDNSSettings(servers = listOf(dnsIp))
 
         return settings
     }
