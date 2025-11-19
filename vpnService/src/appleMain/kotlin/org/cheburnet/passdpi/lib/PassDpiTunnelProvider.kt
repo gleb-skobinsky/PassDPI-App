@@ -138,12 +138,16 @@ class PassDpiTunnelProviderDelegate(
                     tunConfig = tun2socksConfig,
                     completionHandler = completionHandler
                 ) ?: return@withLock
-                val settings = NEPacketTunnelNetworkSettings(tunnelRemoteAddress = "10.10.10.10")
+                val primaryIp = getPrimaryIPv4Address() ?: "10.0.0.1"
+                logger.log("Using remote address: $primaryIp")
+                val settings = NEPacketTunnelNetworkSettings(tunnelRemoteAddress = primaryIp)
                 val ipV4 = NEIPv4Settings(
                     addresses = listOf("10.10.10.10"),
                     subnetMasks = listOf("255.255.255.255")
                 )
                 ipV4.includedRoutes = listOf(NEIPv4Route.defaultRoute())
+                ipV4.excludedRoutes = listOf(NEIPv4Route(primaryIp, "255.255.255.255"))
+                logger.log("Added to excluded")
                 settings.IPv4Settings = ipV4
 
                 if (vpnOptions.enableIpV6) {
