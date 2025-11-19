@@ -19,6 +19,7 @@ import platform.Foundation.NSDocumentDirectory
 import platform.Foundation.NSError
 import platform.Foundation.NSFileManager
 import platform.Foundation.NSLocalizedDescriptionKey
+import platform.Foundation.NSNumber
 import platform.Foundation.NSString
 import platform.Foundation.NSURL
 import platform.Foundation.NSUTF8StringEncoding
@@ -49,6 +50,12 @@ object OptionsStorageProvider {
 private const val CONFIG_FILE_NAME = "config"
 private const val CONFIG_EXT = "tmp"
 private const val CONFIG_FULL_NAME = "$CONFIG_FILE_NAME.$CONFIG_EXT"
+
+private const val TUNNEL_IPV4_ADDRESS = "198.18.0.1"
+private const val TUNNEL_IPV6_ADDRESS = "fc00::1"
+private const val SOCKS_SERVER_HOST = "127.0.0.1"
+
+private const val TUNNEL_MTU = 8500
 
 @Suppress("Unused")
 fun interface PassDpiLogger {
@@ -130,29 +137,11 @@ class PassDpiTunnelProviderDelegate(
                     completionHandler(logAndGetError("Failed to write config to file"))
                     return@withLock
                 }
-                val primaryIp = getPrimaryIPv4Address() ?: "10.0.0.1"
-                logger.log("Using remote address: $primaryIp")
-                val settings = NEPacketTunnelNetworkSettings(tunnelRemoteAddress = primaryIp)
-                val ipV4 = NEIPv4Settings(
-                    addresses = listOf("10.10.10.10"),
-                    subnetMasks = listOf("255.255.255.255")
-                )
-                ipV4.includedRoutes = listOf(NEIPv4Route.defaultRoute())
-                ipV4.excludedRoutes = listOf(NEIPv4Route(primaryIp, "255.255.255.255"))
-                logger.log("Added to excluded")
-                settings.IPv4Settings = ipV4
 
-                if (vpnOptions.enableIpV6) {
-                    val ipV6 = NEIPv6Settings(
-                        addresses = listOf("fd00::1"),
-                        networkPrefixLengths = listOf(128)
-                    )
-                    ipV6.includedRoutes = listOf(NEIPv6Route.defaultRoute())
-                    settings.IPv6Settings = ipV6
+                val settings = createSettings(vpnOptions.enableIpV6) ?: run {
+                    completionHandler(logAndGetError("Failed to create tunnel network settings!"))
+                    return@withLock
                 }
-
-                val dnsSettings = NEDNSSettings(servers = listOf(vpnOptions.dnsIp))
-                settings.DNSSettings = dnsSettings
 
                 logger.log("Command line args: ${vpnOptions.cmdArgs} config path: $configPath")
                 onSetNetworkSettings(settings) { error ->
@@ -185,6 +174,61 @@ class PassDpiTunnelProviderDelegate(
                 }
             }
         }
+    }
+
+    private fun createSettings(
+        enableIpV6: Boolean,
+    ): NEPacketTunnelNetworkSettings? {
+        val subnetMask = "255.255.255.0"   // usually /24 is expected for 198.18.x.x
+        val ipv6Prefix = 64                // typical for ULA fc00::/64
+
+        val primaryEn0Gateway = getGatewayAddressForInterface("en0") ?: return null
+        logger.log("Detected gateway: $primaryEn0Gateway")
+        val settings = NEPacketTunnelNetworkSettings(tunnelRemoteAddress = TUNNEL_IPV4_ADDRESS)
+
+        // IPv4
+        val ipv4 = NEIPv4Settings(
+            addresses = listOf(TUNNEL_IPV4_ADDRESS),
+            subnetMasks = listOf(subnetMask)
+        )
+
+        // Route everything into tunnel
+        ipv4.includedRoutes = listOf(NEIPv4Route.defaultRoute())
+
+        val primaryIp = getPrimaryIPv4Address()
+
+        val excluded = mutableListOf<NEIPv4Route>()
+
+        // Exclude SOCKS server (127.0.0.1)
+        excluded.add(NEIPv4Route(SOCKS_SERVER_HOST, "255.255.255.255"))
+        excluded.add(NEIPv4Route(primaryEn0Gateway, "255.255.255.255"))
+        primaryIp?.let {
+            excluded.add(NEIPv4Route(it, "255.255.255.255"))
+        }
+
+//        val subnet = primaryIp?.substringBeforeLast(".")?.plus(".0")
+//        subnet?.let { excluded.add(NEIPv4Route(it, "255.255.255.0")) }
+
+        ipv4.excludedRoutes = excluded
+
+        settings.IPv4Settings = ipv4
+
+        // IPv6
+        if (enableIpV6) {
+            val ipV6 = NEIPv6Settings(
+                addresses = listOf(TUNNEL_IPV6_ADDRESS),
+                networkPrefixLengths = listOf(ipv6Prefix)
+            )
+            ipV6.includedRoutes = listOf(NEIPv6Route.defaultRoute())
+            settings.IPv6Settings = ipV6
+        }
+        // MTU
+        settings.MTU = NSNumber(TUNNEL_MTU)
+
+        // DNS
+        settings.DNSSettings = NEDNSSettings(servers = listOf("1.1.1.1"))
+
+        return settings
     }
 
     private fun Worker.launch(block: () -> Unit) {
@@ -266,9 +310,15 @@ internal fun writeHevSocks5TunnelConfig(
     val tun2socksConfig = """
     | misc:
     |   task-stack-size: 81920
+    | tunnel:
+    |   name: tun0
+    |   mtu: $TUNNEL_MTU
+    |   multi-queue: false
+    |   ipv4: $TUNNEL_IPV4_ADDRESS
+    |   ipv6: '$TUNNEL_IPV6_ADDRESS'
     | socks5:
-    |   mtu: 8500
-    |   address: 127.0.0.1
+    |   mtu: $TUNNEL_MTU
+    |   address: $SOCKS_SERVER_HOST
     |   port: $port
     |   udp: udp
     """.trimMargin("| ")
