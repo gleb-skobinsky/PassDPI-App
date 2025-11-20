@@ -50,6 +50,7 @@ kotlin {
             dependencies {
                 implementation(projects.tunnelInterop)
                 implementation(projects.byeDpiProxy)
+                api(projects.tunFdRetriever)
             }
         }
 

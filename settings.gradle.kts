@@ -37,5 +37,6 @@ include(
     ":vpnService",
     ":optionsStorage",
     ":tunnelInterop",
-    ":byeDpiProxy"
+    ":byeDpiProxy",
+    ":tunFdRetriever"
 )

@@ -14,6 +14,7 @@ import kotlinx.coroutines.launch
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
 import org.cheburnet.passdpi.store.PassDpiOptionsStorage
+import org.cheburnet.passdpi.tunfd.findTunnelFileDescriptor
 import org.cheburnet.passdpi.tunnel.TunnelAccessor
 import platform.Foundation.NSDocumentDirectory
 import platform.Foundation.NSError
@@ -25,7 +26,6 @@ import platform.Foundation.NSURL
 import platform.Foundation.NSUTF8StringEncoding
 import platform.Foundation.NSUserDomainMask
 import platform.Foundation.dataUsingEncoding
-import platform.Foundation.valueForKey
 import platform.Foundation.writeToURL
 import platform.NetworkExtension.NEDNSSettings
 import platform.NetworkExtension.NEIPv4Route
@@ -149,11 +149,11 @@ class PassDpiTunnelProviderDelegate(
                         logger.log("Set settings error")
                         completionHandler(error)
                     }
-                    val fd = obtainTunFd(packetFlow) ?: run {
+                    val fd = findTunnelFileDescriptor() ?: run {
                         completionHandler(logAndGetError("Couldn't obtain fd from packets"))
                         return@onSetNetworkSettings
                     }
-                    logger.log("Tunnel provider from packet flow: $fd")
+                    logger.log("Tunnel file descriptor: $fd")
                     logger.log("Before proxy start")
 
                     tunnelWorker.launch {
@@ -265,7 +265,7 @@ class PassDpiTunnelProviderDelegate(
             }
         }
 
-        return@memScoped packetFlow.valueForKey("socket.fileDescriptor") as? Int
+        return@memScoped null // packetFlow.valueForKey("socket.fileDescriptor") as? Int
     }
 
     private fun logAndGetError(

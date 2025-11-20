@@ -1,0 +1,4 @@
+headers = Tun2SocksKitC.h
+headerFilter = Tun2SocksKitC.h
+package = org.cheburnet.passdpi.tunfd
+compilerOpts = -Isrc/nativeInterop/cinterop/src
