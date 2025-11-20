@@ -53,7 +53,8 @@ private const val CONFIG_FULL_NAME = "$CONFIG_FILE_NAME.$CONFIG_EXT"
 
 private const val TUNNEL_IPV4_ADDRESS = "198.18.0.1"
 private const val TUNNEL_IPV6_ADDRESS = "fc00::1"
-private const val SOCKS_SERVER_HOST = "127.0.0.1"
+private const val SOCKS_SERVER_HOST_IPV4 = "127.0.0.1"
+private const val SOCKS_SERVER_HOST_IPV6 = "::1"
 
 private const val TUNNEL_MTU = 8500
 
@@ -131,8 +132,11 @@ class PassDpiTunnelProviderDelegate(
                     return@launch
                 }
                 logger.log("Retrieved options successfully: $vpnOptions")
+                logger.log("IPv6 mode: ${vpnOptions.enableIpV6}")
+
                 val configPath = writeHevSocks5TunnelConfig(
                     port = vpnOptions.port,
+                    enableIpv6 = vpnOptions.enableIpV6
                 ) ?: run {
                     completionHandler(logAndGetError("Failed to write config to file"))
                     return@withLock
@@ -201,7 +205,7 @@ class PassDpiTunnelProviderDelegate(
         val excluded = mutableListOf<NEIPv4Route>()
 
         // Exclude SOCKS server (127.0.0.1)
-        excluded.add(NEIPv4Route(SOCKS_SERVER_HOST, "255.255.255.255"))
+        excluded.add(NEIPv4Route(SOCKS_SERVER_HOST_IPV4, "255.255.255.255"))
         excluded.add(NEIPv4Route(primaryEn0Gateway, "255.255.255.255"))
         primaryIp?.let {
             excluded.add(NEIPv4Route(it, "255.255.255.255"))
@@ -218,7 +222,16 @@ class PassDpiTunnelProviderDelegate(
                 networkPrefixLengths = listOf(ipv6Prefix)
             )
             ipV6.includedRoutes = listOf(NEIPv6Route.defaultRoute())
+
+            // Exclude IPv6 localhost (::1) to prevent routing loop with SOCKS proxy
+            val ipv6Excluded = mutableListOf<NEIPv6Route>()
+            ipv6Excluded.add(NEIPv6Route(SOCKS_SERVER_HOST_IPV6, NSNumber(128)))
+            ipV6.excludedRoutes = ipv6Excluded
+
             settings.IPv6Settings = ipV6
+            logger.log("IPv6 enabled with routes, excluded ::1 for SOCKS")
+        } else {
+            logger.log("IPv6 disabled")
         }
         // MTU
         settings.MTU = NSNumber(TUNNEL_MTU)
@@ -304,7 +317,14 @@ private fun writeConfigToFile(
 
 internal fun writeHevSocks5TunnelConfig(
     port: Long,
+    enableIpv6: Boolean = true,
 ): String? {
+    // Always use IPv4 localhost for SOCKS connection to avoid IPv6 binding issues
+    // The proxy binds to 0.0.0.0 which accepts IPv4 connections reliably
+    val socksAddress = SOCKS_SERVER_HOST_IPV4
+
+    val ipv6Line = if (enableIpv6) "  ipv6: '$TUNNEL_IPV6_ADDRESS'" else ""
+
     val tun2socksConfig = """
     | misc:
     |   task-stack-size: 81920
@@ -313,10 +333,10 @@ internal fun writeHevSocks5TunnelConfig(
     |   mtu: $TUNNEL_MTU
     |   multi-queue: false
     |   ipv4: $TUNNEL_IPV4_ADDRESS
-    |   ipv6: '$TUNNEL_IPV6_ADDRESS'
+    |$ipv6Line
     | socks5:
     |   mtu: $TUNNEL_MTU
-    |   address: $SOCKS_SERVER_HOST
+    |   address: $socksAddress
     |   port: $port
     |   udp: udp
     """.trimMargin("| ")

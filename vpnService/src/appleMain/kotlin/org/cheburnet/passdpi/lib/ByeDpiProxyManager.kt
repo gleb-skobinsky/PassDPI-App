@@ -29,16 +29,19 @@ private class ByeDpiProxyManagerImpl(
         commandLineArguments: List<String>,
     ): Int {
         ByeDpiProxyAccessor.maybeLoad()
-        /*
-        // Exclude ciadpi from search
-        if (!commandLineArguments.drop(1).any { "i" in it || "ip" in it }) {
-            logger.log("No ip found. Adding ip: $proxyIp")
-            commandLineArguments.addAll(listOf("--ip", proxyIp))
+
+        // Bind to 0.0.0.0 (IPv4 wildcard) which works reliably on macOS
+        // Note: :: binding has issues with accept() on some configurations
+        val finalArgs = if (!commandLineArguments.any { it == "-i" || it == "--ip" }) {
+            logger.log("No IP binding specified. Binding to 0.0.0.0 (IPv4 wildcard)")
+            commandLineArguments + listOf("--ip", "0.0.0.0")
+        } else {
+            commandLineArguments
         }
-         */
+
         try {
-            logger.log("Right before socket create $commandLineArguments")
-            val fd = createSocket(commandLineArguments.toTypedArray())
+            logger.log("Right before socket create $finalArgs")
+            val fd = createSocket(finalArgs.toTypedArray())
             if (fd < 0) {
                 return -1
             }
