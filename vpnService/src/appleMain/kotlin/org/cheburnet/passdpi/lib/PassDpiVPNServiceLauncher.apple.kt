@@ -8,11 +8,9 @@ import kotlinx.cinterop.alloc
 import kotlinx.cinterop.memScoped
 import kotlinx.cinterop.ptr
 import kotlinx.cinterop.value
-import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.IO
-import kotlinx.coroutines.Job
 import kotlinx.coroutines.channels.awaitClose
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.Flow
@@ -26,14 +24,11 @@ import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
 import kotlinx.coroutines.withContext
 import org.cheburnet.passdpi.store.PassDpiOptionsStorage
-import org.cheburnet.passdpi.tunfd.findTunnelFileDescriptor
-import org.cheburnet.passdpi.tunnel.TunnelAccessor
 import platform.Foundation.NSError
 import platform.NetworkExtension.NETunnelProviderManager
 import platform.NetworkExtension.NETunnelProviderProtocol
 import platform.NetworkExtension.NEVPNStatusConnected
 import platform.NetworkExtension.NEVPNStatusDisconnected
-import platform.posix.err
 import kotlin.coroutines.resume
 import kotlin.coroutines.resumeWithException
 import kotlin.time.Duration.Companion.seconds
@@ -63,40 +58,19 @@ class PassDpiVPNServiceLauncherApple(
 
     override suspend fun startService() {
         mutex.withLock(owner = this) {
-//            val settings = optionsStorage.getEditableSettings()
-//            startServiceWithManager(settings.commandLineArgs)
-            startDebugTunnel()
+            val settings = optionsStorage.getEditableSettings()
+            startServiceWithManager(settings.commandLineArgs)
             logger.d("Service start complete")
         }
     }
 
     override suspend fun stopService() {
         mutex.withLock(owner = this) {
-//            withContext(backgroundDispatcher) {
-//                loadOrCreateManager().connection.stopVPNTunnel()
-//                statusFromInteraction.value = ServiceLauncherState.Stopped
-//            }
-            stopDebugTunnel()
+            withContext(backgroundDispatcher) {
+                loadOrCreateManager().connection.stopVPNTunnel()
+                statusFromInteraction.value = ServiceLauncherState.Stopped
+            }
         }
-    }
-
-    private var debugTunnelJob: Job? = null
-    private val coroutineScope = CoroutineScope(backgroundDispatcher)
-    private fun startDebugTunnel() {
-        debugTunnelJob = coroutineScope.launch {
-            val options = optionsStorage.getVpnOptions()
-            val filePath = writeHevSocks5TunnelConfig(
-                port = options.port.toLong(),
-                enableIpv6 = true
-            ) ?: error("Failed to write tunnel config")
-            val fd = findTunnelFileDescriptor() ?: error("Failed to find tunnel file descriptor")
-            TunnelAccessor.startTunnel(filePath, fd)
-        }
-    }
-
-    private fun stopDebugTunnel() {
-        TunnelAccessor.stopTunnel()
-        debugTunnelJob?.cancel()
     }
 
     @OptIn(ExperimentalForeignApi::class, BetaInteropApi::class)

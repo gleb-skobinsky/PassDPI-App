@@ -90,7 +90,7 @@ internal class PassDpiOptionsStorageImpl(
     }
 
     private fun Preferences?.ipv6Enabled(): Boolean {
-        return this?.get(ipv6EnabledKey) ?: false
+        return this?.get(ipv6EnabledKey) ?: true
     }
 
     private fun Preferences?.commandLineArgs(): String {

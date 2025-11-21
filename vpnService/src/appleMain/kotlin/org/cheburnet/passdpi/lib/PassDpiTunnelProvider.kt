@@ -1,11 +1,6 @@
 package org.cheburnet.passdpi.lib
 
-import kotlinx.cinterop.ByteVar
 import kotlinx.cinterop.ExperimentalForeignApi
-import kotlinx.cinterop.allocArray
-import kotlinx.cinterop.cValuesOf
-import kotlinx.cinterop.memScoped
-import kotlinx.cinterop.toKString
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.IO
@@ -35,8 +30,6 @@ import platform.NetworkExtension.NEIPv6Settings
 import platform.NetworkExtension.NEPacketTunnelFlow
 import platform.NetworkExtension.NEPacketTunnelNetworkSettings
 import platform.NetworkExtension.NETunnelNetworkSettings
-import platform.posix.IFNAMSIZ
-import platform.posix.getsockopt
 import kotlin.native.concurrent.ObsoleteWorkersApi
 import kotlin.native.concurrent.TransferMode
 import kotlin.native.concurrent.Worker
@@ -261,26 +254,6 @@ class PassDpiTunnelProviderDelegate(
         coroutineScope.cancel()
     }
 
-    private fun obtainTunFd(packetFlow: NEPacketTunnelFlow): Int? = memScoped {
-        // Allocate a buffer for interface name
-        val buf = allocArray<ByteVar>(IFNAMSIZ)
-
-        for (fd in 0..1024) {
-            val len = IFNAMSIZ.toUInt()
-            // 2, 2 => IPPROTO_IP / IGMP option combination used to get utun name
-            val result = getsockopt(fd, 2, 2, buf, cValuesOf(len))
-
-            if (result == 0) {
-                val name = buf.toKString()
-                if (name.startsWith("utun")) {
-                    return@memScoped fd
-                }
-            }
-        }
-
-        return@memScoped null // packetFlow.valueForKey("socket.fileDescriptor") as? Int
-    }
-
     private fun logAndGetError(
         msg: String,
     ): NSError {
@@ -317,12 +290,8 @@ private fun writeConfigToFile(
 
 internal fun writeHevSocks5TunnelConfig(
     port: Long,
-    enableIpv6: Boolean = true,
+    enableIpv6: Boolean,
 ): String? {
-    // Always use IPv4 localhost for SOCKS connection to avoid IPv6 binding issues
-    // The proxy binds to 0.0.0.0 which accepts IPv4 connections reliably
-    val socksAddress = SOCKS_SERVER_HOST_IPV4
-
     val ipv6Line = if (enableIpv6) "  ipv6: '$TUNNEL_IPV6_ADDRESS'" else ""
 
     val tun2socksConfig = """
@@ -336,46 +305,11 @@ internal fun writeHevSocks5TunnelConfig(
     |$ipv6Line
     | socks5:
     |   mtu: $TUNNEL_MTU
-    |   address: $socksAddress
+    |   address: $SOCKS_SERVER_HOST_IPV4
     |   port: $port
     |   udp: udp
     """.trimMargin("| ")
     return writeConfigToFile(
         tunConfig = tun2socksConfig,
     )
-}
-
-private fun createSettings2(
-    enableIpV6: Boolean,
-    dnsIp: String,
-): NEPacketTunnelNetworkSettings? {
-    val settings = NEPacketTunnelNetworkSettings(tunnelRemoteAddress = "198.18.0.254")
-    val ipv4Settings = NEIPv4Settings(
-        addresses = listOf("198.18.0.1"), // TUNNEL_IPV4_ADDRESS
-        subnetMasks = listOf("255.255.255.0")
-    )
-    val defaultIPv4Route = NEIPv4Route.defaultRoute()
-    val socksServerIP = "10.0.0.1"
-    val gatewayIP = "10.0.2.2"
-    val socksBypassRoute = NEIPv4Route(
-        destinationAddress = socksServerIP,
-        subnetMask = "255.255.255.255"
-    )
-    socksBypassRoute.gatewayAddress = gatewayIP
-    ipv4Settings.includedRoutes = listOf(socksBypassRoute, defaultIPv4Route)
-    ipv4Settings.excludedRoutes = emptyList<NEIPv4Route>()
-    settings.IPv4Settings = ipv4Settings
-
-    val ipv6Settings = NEIPv6Settings(
-        addresses = listOf("fc00::1"), // TUNNEL_IPV6_ADDRESS
-        networkPrefixLengths = listOf(64)
-    )
-    val defaultIPv6Route = NEIPv6Route.defaultRoute()
-    ipv6Settings.includedRoutes = listOf(defaultIPv6Route)
-    settings.IPv6Settings = ipv6Settings
-    val dnsSettings = NEDNSSettings(servers = listOf(dnsIp))
-    dnsSettings.matchDomains = listOf("")
-    settings.DNSSettings = dnsSettings
-    settings.MTU = NSNumber(8500) // TUNNEL_MTU
-    return settings
 }

@@ -29,12 +29,9 @@ private class ByeDpiProxyManagerImpl(
         commandLineArguments: List<String>,
     ): Int {
         ByeDpiProxyAccessor.maybeLoad()
-
-        // Bind to 0.0.0.0 (IPv4 wildcard) which works reliably on macOS
-        // Note: :: binding has issues with accept() on some configurations
         val finalArgs = if (!commandLineArguments.any { it == "-i" || it == "--ip" }) {
-            logger.log("No IP binding specified. Binding to 0.0.0.0 (IPv4 wildcard)")
-            commandLineArguments + listOf("--ip", "0.0.0.0")
+            logger.log("No IP binding specified. Binding to :: (dual-stack IPv6)")
+            commandLineArguments + listOf("--ip", "::")
         } else {
             commandLineArguments
         }
