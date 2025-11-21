@@ -292,7 +292,7 @@ internal fun writeHevSocks5TunnelConfig(
     port: Long,
     enableIpv6: Boolean,
 ): String? {
-    val ipv6Line = if (enableIpv6) "  ipv6: '$TUNNEL_IPV6_ADDRESS'" else ""
+    val ipv6Line = if (enableIpv6) "   ipv6: '$TUNNEL_IPV6_ADDRESS'" else ""
 
     val tun2socksConfig = """
     | misc:
