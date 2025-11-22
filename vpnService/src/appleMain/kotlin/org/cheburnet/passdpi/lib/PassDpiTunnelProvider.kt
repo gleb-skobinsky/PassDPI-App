@@ -300,7 +300,7 @@ internal fun writeHevSocks5TunnelConfig(
     |   ipv4: $TUNNEL_IPV4_ADDRESS
     |$ipv6Line
     | socks5:
-    |   address: '::1'
+    |   address: '$SOCKS_SERVER_HOST_IPV6'
     |   port: $port
     |   udp: udp
     """.trimMargin("| ")
