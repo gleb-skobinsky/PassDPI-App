@@ -197,8 +197,6 @@ class PassDpiTunnelProviderDelegate(
 
         val excluded = mutableListOf<NEIPv4Route>()
 
-        // Exclude SOCKS server (127.0.0.1)
-        excluded.add(NEIPv4Route(SOCKS_SERVER_HOST_IPV4, "255.255.255.255"))
         excluded.add(NEIPv4Route(primaryEn0Gateway, "255.255.255.255"))
         primaryIp?.let {
             excluded.add(NEIPv4Route(it, "255.255.255.255"))
@@ -218,7 +216,6 @@ class PassDpiTunnelProviderDelegate(
 
             // Exclude IPv6 localhost (::1) to prevent routing loop with SOCKS proxy
             val ipv6Excluded = mutableListOf<NEIPv6Route>()
-            ipv6Excluded.add(NEIPv6Route(SOCKS_SERVER_HOST_IPV6, NSNumber(128)))
             ipV6.excludedRoutes = ipv6Excluded
 
             settings.IPv6Settings = ipV6
@@ -292,8 +289,7 @@ internal fun writeHevSocks5TunnelConfig(
     port: Long,
     enableIpv6: Boolean,
 ): String? {
-    val ipv6Line = if (enableIpv6) "   ipv6: '$TUNNEL_IPV6_ADDRESS'" else ""
-
+    val ipv6Line = if (enableIpv6) "   ipv6: 'fc00::1'" else ""
     val tun2socksConfig = """
     | misc:
     |   task-stack-size: 81920
@@ -304,8 +300,7 @@ internal fun writeHevSocks5TunnelConfig(
     |   ipv4: $TUNNEL_IPV4_ADDRESS
     |$ipv6Line
     | socks5:
-    |   mtu: $TUNNEL_MTU
-    |   address: $SOCKS_SERVER_HOST_IPV4
+    |   address: '::1'
     |   port: $port
     |   udp: udp
     """.trimMargin("| ")

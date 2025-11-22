@@ -17,6 +17,7 @@ class PassDPITunnelProvider: NEPacketTunnelProvider {
         options: [String : NSObject]? = nil,
         completionHandler: @escaping (Error?) -> Void
     ) {
+        redirectStdoutToFile()
         delegate.startPassDpiTunnel(
             packetFlow: packetFlow,
             options: options,
@@ -41,3 +42,20 @@ class PassDPITunnelProvider: NEPacketTunnelProvider {
         delegate.onCleared()
     }
 }
+
+func redirectStdoutToFile() {
+    let fileManager = FileManager.default
+    let logFile = URL(fileURLWithPath: NSTemporaryDirectory())
+        .appendingPathComponent("passdpi_tunnel.log")
+    
+    fileManager.createFile(atPath: logFile.path, contents: nil, attributes: nil)
+    
+    freopen(logFile.path, "a", stdout)
+    freopen(logFile.path, "a", stderr)
+    setvbuf(stdout, nil, _IONBF, 0)
+    setvbuf(stderr, nil, _IONBF, 0)
+    
+    // Log the location so you know where to find it
+    NSLog("Logs redirected to: \(logFile.path)")
+}
+

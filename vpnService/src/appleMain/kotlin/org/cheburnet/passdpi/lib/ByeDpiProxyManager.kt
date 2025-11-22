@@ -30,8 +30,8 @@ private class ByeDpiProxyManagerImpl(
     ): Int {
         ByeDpiProxyAccessor.maybeLoad()
         val finalArgs = if (!commandLineArguments.any { it == "-i" || it == "--ip" }) {
-            logger.log("No IP binding specified. Binding to :: (dual-stack IPv6)")
-            commandLineArguments + listOf("--ip", "::")
+            //logger.log("No IP binding specified. Binding to :: (dual-stack IPv6)")
+            commandLineArguments + listOf("--ip", "::", "--conn-ip", "::", )
         } else {
             commandLineArguments
         }
